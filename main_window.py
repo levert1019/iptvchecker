@@ -1,20 +1,14 @@
-# gui.py
-
+from styles import STYLE_SHEET
+from workers import WorkerThread
 import sys
 import os
 import threading
 import queue
-
+from dialogs import GroupSelectionDialog
 from PyQt5 import QtWidgets, QtGui, QtCore
 from parser import parse_groups
 from checker import check_stream
 
-# Theme colors
-DEEP_PURPLE = "#5b2fc9"
-DARK_BG     = "#2b2b2b"
-MID_BG      = "#3c3f41"
-TEXT_LIGHT  = "#e0e0e0"
-HEADER_FONT = "Arial"
 
 # Shared dark theme stylesheet
 STYLE_SHEET = f"""
@@ -58,60 +52,6 @@ QScrollBar::add-page, QScrollBar::sub-page {{
 QTextEdit {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
 QStatusBar {{ background: {MID_BG}; color: {TEXT_LIGHT}; }}
 """
-
-class WorkerThread(QtCore.QThread):
-    result = QtCore.pyqtSignal(str, str, str, str, str)  # name, status, res, bitrate, fps
-    log    = QtCore.pyqtSignal(str, str)                # level, msg
-
-    def __init__(self, tasks: queue.Queue, retries: int, timeout: float):
-        super().__init__()
-        self.tasks   = tasks
-        self.retries = retries
-        self.timeout = timeout
-        self._pause  = threading.Event()
-        self._stop   = threading.Event()
-
-    def run(self):
-        while not self._stop.is_set():
-            try:
-                name, url = self.tasks.get_nowait()
-            except queue.Empty:
-                break
-
-            # pause handling
-            while self._pause.is_set() and not self._stop.is_set():
-                self.sleep(1)
-                if self._stop.is_set():
-                    break
-
-            status, res, br, fps = 'DOWN', '–', '–', '–'
-            for attempt in range(1, self.retries + 1):
-                self.log.emit('info', f"Testing {name} (try {attempt})")
-                st, r, b, f = check_stream(name, url, timeout=self.timeout)
-                if st == 'UP':
-                    status, res, br, fps = st, r, b, f
-                    self.log.emit('working', f"{name} OK [{r}, {f} FPS, {b}]")
-                    break
-                elif st == 'BLACK_SCREEN':
-                    status, res, br, fps = st, r, b, f
-                    self.log.emit('error', f"{name} BLACK SCREEN")
-                    break
-                else:
-                    status, res, br, fps = st, r, b, f
-                    self.log.emit('error', f"{name} DOWN")
-
-            self.result.emit(name, status, res, br, fps)
-            self.log.emit('info', 'Worker thread finished')
-
-    def pause(self):
-        self._pause.set()
-
-    def resume(self):
-        self._pause.clear()
-
-    def stop(self):
-        self._stop.set()
-        self.resume()
 
 
 class IPTVChecker(QtWidgets.QMainWindow):
