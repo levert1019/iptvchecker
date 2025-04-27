@@ -1,224 +1,248 @@
+import requests
+import ffmpeg
+
+def check_stream(url: str, timeout: int = 10) -> tuple[str, str, str]:
+    """
+    Return (status, resolution, bitrate) for a stream URL.
+    Possible statuses: 'UP', 'BLACK_SCREEN', 'DOWN', 'ERROR'.
+    """
+    try:
+        resp = requests.head(url, timeout=timeout)
+        if resp.status_code != 200:
+            return 'DOWN', '–', '–'
+        try:
+            info = ffmpeg.probe(url, select_streams='v', show_streams=True)
+            stream = info['streams'][0]
+            res = f"{stream['width']}×{stream['height']}"
+            br = stream.get('bit_rate', '–')
+            return 'UP', res, br
+        except Exception:
+            return 'BLACK_SCREEN', '–', '–'
+    except Exception:
+        return 'ERROR', '–', '–'
+
+
+# gui.py
 import sys
+from queue import Queue
 from PyQt5 import QtWidgets, QtGui, QtCore
 from parser import parse_groups
+from checker import check_stream
 
 # Theme colors
 DEEP_PURPLE = "#5b2fc9"
 DARK_BG     = "#2b2b2b"
 MID_BG      = "#3c3f41"
 TEXT_LIGHT  = "#e0e0e0"
+GREEN       = "#00c853"
+RED         = "#d50000"
+ORANGE      = "#ffab00"
 HEADER_FONT = "Arial"
 
 # Shared dark theme stylesheet
-STYLE_SHEET = f"""
-QMainWindow, QDialog {{ background: {DARK_BG}; color: {TEXT_LIGHT}; }}
-QLabel, QGroupBox::title {{ color: {TEXT_LIGHT}; }}
-QLineEdit {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
-QListWidget {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; padding-right: 20px; }}
-QPushButton {{
-    background: {DEEP_PURPLE};
-    color: white;
-    border-radius: 4px;
-    padding: 6px;
-}}
+STYLE = f"""
+QWidget {{ background: {DARK_BG}; color: {TEXT_LIGHT}; }}
+QLabel {{ color: {TEXT_LIGHT}; }}
+QLineEdit, QSpinBox, QComboBox {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; padding: 2px; }}
+QPushButton {{ background: {DEEP_PURPLE}; color: white; border-radius: 4px; padding: 6px; }}
 QPushButton:hover {{ background: #7e52e0; }}
-QGroupBox {{
-    background: {MID_BG};
-    border: 2px solid {DEEP_PURPLE};
-    margin-top: 1em;
-    padding: 0px;
-}}
-QScrollArea {{ background: {DARK_BG}; border: none; padding: 0px; margin: 0px; }}
-QScrollArea > QWidget {{ background: {DARK_BG}; margin: 0px; padding: 0px; }}
-QScrollBar:vertical, QScrollBar:horizontal {{
-    background: {MID_BG};
-    width: 12px;
-    height: 12px;
-}}
-QScrollBar::handle {{
-    background: {DEEP_PURPLE};
-    min-height: 20px;
-    border-radius: 6px;
-}}
-QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {{
-    background: none;
-    border: none;
-}}
+QGroupBox {{ border: 2px solid {DEEP_PURPLE}; margin-top: 1em; }}
+QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 4px; }}
+QListWidget, QPlainTextEdit {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; padding-right: 20px; }}
+QCheckBox {{ color: {TEXT_LIGHT}; }}
 """
 
-class GroupSelectionDialog(QtWidgets.QDialog):
-    def __init__(self, categories: dict, group_urls: dict, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Select Groups")
-        self.resize(900, 600)
-        self.setStyleSheet(STYLE_SHEET)
+class WorkerThread(QtCore.QThread):
+    message = QtCore.pyqtSignal(str, str)
+    result = QtCore.pyqtSignal(str, str)
 
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(0,0,0,0)
-        main_layout.setSpacing(0)
+    def __init__(self, queue, retries, timeout):
+        super().__init__()
+        self.queue = queue
+        self.retries = retries
+        self.timeout = timeout
+        self._pause = threading.Event()
+        self._pause.set()
+        self._running = True
 
-        scroll = QtWidgets.QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
-        scroll.setContentsMargins(0,0,0,0)
-        content = QtWidgets.QWidget()
-        scroll.setWidget(content)
+    def run(self):
+        while self._running:
+            self._pause.wait()
+            try:
+                url = self.queue.get(timeout=0.1)
+            except:
+                continue
+            status = None
+            for attempt in range(self.retries + 1):
+                status, res, br = check_stream(url, timeout=self.timeout)
+                if status == 'UP':
+                    self.message.emit('success', f"{url} => OK [{res}, {br}]")
+                    self.result.emit('Working', url)
+                    break
+                elif status == 'BLACK_SCREEN':
+                    self.message.emit('info', f"{url} => Black Screen detected")
+                    self.result.emit('Black Screen', url)
+                    break
+                else:
+                    self.message.emit('info', f"{url} retry {attempt+1}/{self.retries}")
+            else:
+                self.message.emit('error', f"{url} => DOWN after {self.retries} retries")
+                self.result.emit('Non Working', url)
+            self.queue.task_done()
 
-        grid = QtWidgets.QGridLayout(content)
-        grid.setContentsMargins(10,10,10,10)
-        grid.setHorizontalSpacing(20)
-        grid.setVerticalSpacing(10)
+    def pause(self):
+        self._pause.clear()
 
-        self.list_widgets = {}
-        for col, cat in enumerate(['Live', 'Movie', 'Series']):
-            groups = categories.get(cat, [])
-            box = QtWidgets.QGroupBox(f"{cat} Channels")
-            box_layout = QtWidgets.QVBoxLayout()
-            box_layout.setContentsMargins(10,10,10,10)
-            box_layout.setSpacing(5)
+    def resume(self):
+        self._pause.set()
 
-            # Buttons: Select All & Unselect All
-            btn_layout = QtWidgets.QHBoxLayout()
-            btn_layout.setContentsMargins(0,0,0,0)
-            btn_layout.setSpacing(5)
-            btn_select_all = QtWidgets.QPushButton("Select All")
-            btn_unselect_all = QtWidgets.QPushButton("Unselect All")
-            btn_layout.addWidget(btn_select_all)
-            btn_layout.addWidget(btn_unselect_all)
-            box_layout.addLayout(btn_layout)
-
-            # List widget for group items
-            lw = QtWidgets.QListWidget()
-            lw.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-            lw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-            lw.customContextMenuRequested.connect(
-                lambda pos, lw=lw: self.open_context_menu(lw, pos)
-            )
-
-            for g in groups:
-                count = len(group_urls.get(g, []))
-                item = QtWidgets.QListWidgetItem(f"{g} ({count})")
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                lw.addItem(item)
-            box_layout.addWidget(lw)
-
-            # Connect button actions
-            btn_select_all.clicked.connect(
-                lambda _, lw=lw: self._set_all_check_state(lw, QtCore.Qt.Checked)
-            )
-            btn_unselect_all.clicked.connect(
-                lambda _, lw=lw: self._set_all_check_state(lw, QtCore.Qt.Unchecked)
-            )
-
-            box.setLayout(box_layout)
-            grid.addWidget(box, 0, col)
-            self.list_widgets[cat] = lw
-
-        main_layout.addWidget(scroll)
-
-        # OK / Cancel
-        buttons = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        main_layout.addWidget(buttons)
-
-    def _set_all_check_state(self, lw, state):
-        for i in range(lw.count()):
-            lw.item(i).setCheckState(state)
-
-    def open_context_menu(self, lw, pos):
-        menu = QtWidgets.QMenu()
-        action_check   = menu.addAction("Check Selected")
-        action_uncheck = menu.addAction("Uncheck Selected")
-        chosen = menu.exec_(lw.mapToGlobal(pos))
-        if chosen == action_check:
-            for item in lw.selectedItems():
-                item.setCheckState(QtCore.Qt.Checked)
-        elif chosen == action_uncheck:
-            for item in lw.selectedItems():
-                item.setCheckState(QtCore.Qt.Unchecked)
-
-    def selected_groups(self) -> list[str]:
-        selections = []
-        for lw in self.list_widgets.values():
-            for i in range(lw.count()):
-                item = lw.item(i)
-                if item.checkState() == QtCore.Qt.Checked:
-                    name = item.text().rsplit(' (', 1)[0]
-                    selections.append(name)
-        return selections
+    def stop(self):
+        self._running = False
+        self._pause.set()
 
 class IPTVChecker(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("DonTV IPTV Checker")
-        self.resize(800, 600)
-        self.group_urls = {}
-        self.categories = {}
-        self.selected = []
-        self._setup_ui()
-        self.setStyleSheet(STYLE_SHEET)
+        self.resize(1000, 700)
+        self.setStyleSheet(STYLE)
 
-    def _setup_ui(self):
+        self.group_urls = {}
+        self.selected = []
+        self.queue = Queue()
+        self.threads = []
+
+        self._build_ui()
+
+    def _build_ui(self):
         central = QtWidgets.QWidget()
-        layout  = QtWidgets.QVBoxLayout(central)
+        layout = QtWidgets.QVBoxLayout(central)
         layout.setContentsMargins(10,10,10,10)
         layout.setSpacing(10)
 
-        # Header
-        header = QtWidgets.QLabel()
-        header.setText(
-            f'<span style="font-family:{HEADER_FONT}; font-weight:bold; font-size:28pt; '
-            f'color:{TEXT_LIGHT};">Don</span>'
-            f'<span style="font-family:{HEADER_FONT}; font-weight:bold; font-size:28pt; '
-            f'color:{DEEP_PURPLE};">TV</span>'
-            f'<span style="font-family:{HEADER_FONT}; font-weight:bold; font-size:16pt; '
-            f'color:{TEXT_LIGHT};"> IPTV Checker</span>'
+        hdr = QtWidgets.QLabel(
+            f'<span style="font-family:{HEADER_FONT}; font-size:28pt; color:{TEXT_LIGHT}; font-weight:bold;">Don</span>'
+            f'<span style="font-family:{HEADER_FONT}; font-size:28pt; color:{DEEP_PURPLE}; font-weight:bold;">TV</span> IPTV Checker'
         )
-        header.setAlignment(QtCore.Qt.AlignCenter)
-        header.setTextFormat(QtCore.Qt.RichText)
-        layout.addWidget(header)
+        hdr.setAlignment(QtCore.Qt.AlignCenter)
+        hdr.setTextFormat(QtCore.Qt.RichText)
+        layout.addWidget(hdr)
 
-        # File picker + select
+        # Parameters
+        params = QtWidgets.QHBoxLayout()
+        params.addWidget(QtWidgets.QLabel("Workers:"))
+        self.sp_workers = QtWidgets.QSpinBox(); self.sp_workers.setRange(1,100); self.sp_workers.setValue(10)
+        params.addWidget(self.sp_workers)
+        params.addWidget(QtWidgets.QLabel("Timeout:"))
+        self.sp_timeout = QtWidgets.QSpinBox(); self.sp_timeout.setRange(1,60); self.sp_timeout.setValue(10)
+        params.addWidget(self.sp_timeout)
+        params.addWidget(QtWidgets.QLabel("Retries:"))
+        self.sp_retries = QtWidgets.QSpinBox(); self.sp_retries.setRange(0,5); self.sp_retries.setValue(2)
+        params.addWidget(self.sp_retries)
+        layout.addLayout(params)
+
+        # Control buttons
+        ctrls = QtWidgets.QHBoxLayout()
+        self.btn_start = QtWidgets.QPushButton("Start")
+        self.btn_start.clicked.connect(self.start_check)
+        self.btn_pause = QtWidgets.QPushButton("Pause")
+        self.btn_pause.clicked.connect(self.pause_check)
+        self.btn_stop = QtWidgets.QPushButton("Stop")
+        self.btn_stop.clicked.connect(self.stop_check)
+        ctrls.addWidget(self.btn_start)
+        ctrls.addWidget(self.btn_pause)
+        ctrls.addWidget(self.btn_stop)
+        layout.addLayout(ctrls)
+
+        # Result panes
+        panes = QtWidgets.QHBoxLayout()
+        box_w, self.lw_working = self._make_listbox("Working")
+        box_b, self.lw_black   = self._make_listbox("Black Screen")
+        box_n, self.lw_fail    = self._make_listbox("Non Working")
+        panes.addWidget(box_w)
+        panes.addWidget(box_b)
+        panes.addWidget(box_n)
+        layout.addLayout(panes)
+
+        # Console & filters
+        console_box = QtWidgets.QGroupBox("Console")
+        vb = QtWidgets.QVBoxLayout(console_box)
+        hf = QtWidgets.QHBoxLayout()
+        self.cb_ok   = QtWidgets.QCheckBox("Show OK");   self.cb_ok.setChecked(True)
+        self.cb_info = QtWidgets.QCheckBox("Show Info"); self.cb_info.setChecked(True)
+        self.cb_fail = QtWidgets.QCheckBox("Show Fail"); self.cb_fail.setChecked(True)
+        hf.addWidget(self.cb_ok); hf.addWidget(self.cb_info); hf.addWidget(self.cb_fail)
+        vb.addLayout(hf)
+        self.console = QtWidgets.QPlainTextEdit(); self.console.setReadOnly(True)
+        vb.addWidget(self.console)
+        layout.addWidget(console_box)
+
+        # File & group selection
         top = QtWidgets.QHBoxLayout()
-        top.setContentsMargins(0,0,0,0)
-        top.setSpacing(5)
-        self.file_input = QtWidgets.QLineEdit()
+        self.le_file = QtWidgets.QLineEdit()
         btn_browse = QtWidgets.QPushButton("Browse M3U")
         btn_browse.clicked.connect(self._browse_file)
-        self.btn_select_groups = QtWidgets.QPushButton("Select Groups")
-        self.btn_select_groups.setEnabled(False)
-        self.btn_select_groups.clicked.connect(self._open_group_selection)
-
-        top.addWidget(self.file_input)
-        top.addWidget(btn_browse)
-        top.addWidget(self.btn_select_groups)
-        layout.addLayout(top)
+        btn_select = QtWidgets.QPushButton("Select Groups")
+        btn_select.clicked.connect(self._select_groups)
+        top.addWidget(self.le_file); top.addWidget(btn_browse); top.addWidget(btn_select)
+        layout.insertLayout(1, top)
 
         self.setCentralWidget(central)
+
+    def _make_listbox(self, title):
+        box = QtWidgets.QGroupBox(title)
+        v = QtWidgets.QVBoxLayout(box)
+        lw = QtWidgets.QListWidget()
+        v.addWidget(lw)
+        return box, lw
 
     def _browse_file(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Select M3U File", "", "M3U Files (*.m3u)"
         )
         if path:
-            self.file_input.setText(path)
-            groups_dict, cats = parse_groups(path)
-            self.group_urls = groups_dict
-            self.categories  = cats
-            self.btn_select_groups.setEnabled(True)
+            self.le_file.setText(path)
 
-    def _open_group_selection(self):
-        dlg = GroupSelectionDialog(self.categories, self.group_urls, self)
+    def _select_groups(self):
+        from qt_helpers import GroupSelectionDialog
+        gu, cats = parse_groups(self.le_file.text())
+        self.group_urls = gu
+        dlg = GroupSelectionDialog(cats, gu, self)
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
             self.selected = dlg.selected_groups()
-            QtWidgets.QMessageBox.information(
-                self, "Selected Groups",
-                f"You selected {len(self.selected)} groups."
-            )
+
+    def log(self, level, text):
+        color = {'success':GREEN, 'info':ORANGE, 'error':RED}.get(level, TEXT_LIGHT)
+        if level=='success' and not self.cb_ok.isChecked(): return
+        if level=='info'    and not self.cb_info.isChecked(): return
+        if level=='error'   and not self.cb_fail.isChecked(): return
+        self.console.appendHtml(f'<span style="color:{color};">{text}</span>')
+
+    def start_check(self):
+        # clear previous
+        self.lw_working.clear(); self.lw_black.clear(); self.lw_fail.clear(); self.console.clear()
+        for url in sum((self.group_urls[g] for g in self.selected), []):
+            self.queue.put(url)
+        self.stop_check()
+        for _ in range(self.sp_workers.value()):
+            t = WorkerThread(self.queue, self.sp_retries.value(), self.sp_timeout.value())
+            t.message.connect(self.log)
+            t.result.connect(self._add_result)
+            t.start()
+            self.threads.append(t)
+
+    def pause_check(self):
+        for t in self.threads: t.pause()
+
+    def stop_check(self):
+        for t in self.threads: t.stop()
+        self.threads = []
+
+    def _add_result(self, category, url):
+        if category=='Working': self.lw_working.addItem(url)
+        elif category=='Black Screen': self.lw_black.addItem(url)
+        else: self.lw_fail.addItem(url)
+
 
 def run_gui():
     app = QtWidgets.QApplication(sys.argv)

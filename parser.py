@@ -20,7 +20,7 @@ def parse_groups(path: str) -> tuple[dict, dict]:
         r'#EXTINF:.*?group-title="([^\"]+)".*?\r?\n([^\r\n]+)',
         re.IGNORECASE
     )
-    group_urls: dict[str, list[str]] = {}
+    group_urls = {}
     for match in pattern.finditer(data):
         grp = match.group(1)
         url = match.group(2).strip()
@@ -29,11 +29,13 @@ def parse_groups(path: str) -> tuple[dict, dict]:
     categories = {'Live': [], 'Movie': [], 'Series': []}
     for grp, urls in group_urls.items():
         ul = [u.lower() for u in urls]
-        if any('movie' in u or 'movies' in u for u in ul):
-            categories['Movie'].append(grp)
-        if any('series' in u for u in ul):
-            categories['Series'].append(grp)
-        if all('movie' not in u and 'movies' not in u and 'series' not in u for u in ul):
+        has_movie = any('movie' in u or 'movies' in u for u in ul)
+        has_series = any('series' in u for u in ul)
+        has_live = any(not ('movie' in u or 'movies' in u or 'series' in u) for u in ul)
+        if has_live:
             categories['Live'].append(grp)
-
+        if has_movie:
+            categories['Movie'].append(grp)
+        if has_series:
+            categories['Series'].append(grp)
     return group_urls, categories
