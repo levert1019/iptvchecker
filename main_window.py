@@ -4,9 +4,8 @@ from styles import STYLE_SHEET, DEEP_PURPLE, TEXT_LIGHT, HEADER_FONT
 import sys, os, queue, threading
 from PyQt5 import QtWidgets, QtCore
 from parser import parse_groups
-from dialogs import GroupSelectionDialog
 from workers import WorkerThread
-from styles import STYLE_SHEET
+
 # …  
 class IPTVChecker(QtWidgets.QMainWindow):
     # …
