@@ -2,6 +2,8 @@
 import requests
 import subprocess
 from typing import Tuple
+self._is_paused = False
+
 
 def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str,str,str,str]:
     """

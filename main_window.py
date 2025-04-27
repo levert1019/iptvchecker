@@ -1,57 +1,15 @@
-from styles import STYLE_SHEET
-from workers import WorkerThread
 import sys
 import os
 import threading
 import queue
-from dialogs import GroupSelectionDialog
+
 from PyQt5 import QtWidgets, QtGui, QtCore
 from parser import parse_groups
 from checker import check_stream
-
-
-# Shared dark theme stylesheet
-STYLE_SHEET = f"""
-QWidget {{ background: {DARK_BG}; color: {TEXT_LIGHT}; }}
-QLabel, QGroupBox::title {{ color: {TEXT_LIGHT}; }}
-QLineEdit {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
-QSpinBox, QComboBox {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
-QCheckBox {{ color: {TEXT_LIGHT}; }}
-QPushButton {{
-    background: {DEEP_PURPLE};
-    color: white;
-    border-radius: 4px;
-    padding: 6px;
-}}
-QPushButton:hover {{ background: #7e52e0; }}
-QGroupBox {{
-    background: {MID_BG};
-    border: 2px solid {DEEP_PURPLE};
-    margin-top: 1em;
-}}
-QGroupBox::title {{
-    background-color: {DARK_BG};
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 4px;
-}}
-QTableWidget, QListWidget {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
-QScrollArea {{ background: {DARK_BG}; border: none; }}
-QScrollBar:vertical, QScrollBar:horizontal {{
-    background: {MID_BG};
-    width: 12px; height: 12px;
-}}
-QScrollBar::handle {{
-    background: {DEEP_PURPLE};
-    min-height: 20px; border-radius: 6px;
-}}
-QScrollBar::add-line, QScrollBar::sub-line,
-QScrollBar::add-page, QScrollBar::sub-page {{
-    background: none; border: none;
-}}
-QTextEdit {{ background: {MID_BG}; color: {TEXT_LIGHT}; border: none; }}
-QStatusBar {{ background: {MID_BG}; color: {TEXT_LIGHT}; }}
-"""
+from workers import WorkerThread
+from dialogs import GroupSelectionDialog
+from styles import STYLE_SHEET
+from styles import DARK_BG, TEXT_LIGHT, HEADER_FONT, DEEP_PURPLE, MID_BG 
 
 
 class IPTVChecker(QtWidgets.QMainWindow):
@@ -137,7 +95,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         v.addLayout(h2)
 
         self.btn_start.clicked.connect(self.start_check)
-        self.btn_pause.clicked.connect(self.pause_check)
+        self.btn_pause.clicked.connect(self._on_pause_resume)
         self.btn_stop.clicked.connect(self.stop_check)
 
         # Result panes
@@ -177,6 +135,32 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.setStatusBar(self.status)
         self.setCentralWidget(win)
 
+    def _on_pause_resume(self):
+      if not self._is_paused:
+        # Pausing
+        for t in self.threads:
+            t.pause()
+        self.btn_pause.setText("Resume")
+        self.status.showMessage("Paused", 3000)
+      else:
+        # Resuming
+          for t in self.threads:
+              t.resume()
+          self.btn_pause.setText("Pause")
+          self.status.showMessage("Resumed", 3000)
+        self._is_paused = not self._is_paused
+    
+    def stop_check(self):
+        for t in self.threads:
+            t.stop()
+    # …
+    # reset pause button
+        if self._is_paused:
+            self._is_paused = False
+            self.btn_pause.setText("Pause")
+    # …
+
+
     # ==== UI callbacks ====
 
     def _on_browse_m3u(self):
@@ -192,8 +176,6 @@ class IPTVChecker(QtWidgets.QMainWindow):
             self.btn_select.setEnabled(True)
 
     def _on_select_groups(self):
-        # pass both categories and full mapping into the dialog
-        from qt_helpers import GroupSelectionDialog
         dlg = GroupSelectionDialog(self.categories, self.group_urls, parent=self)
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
             self.selected_groups = dlg.selected_groups()
