@@ -17,6 +17,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle("DonTV IPTV Checker")
         self.resize(1000, 700)
+        self._is_paused = False 
 
         self.group_urls      = {}
         self.categories      = {}
@@ -103,7 +104,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         for title in ["Working", "Black Screen", "Non Working"]:
             box = QtWidgets.QGroupBox(title)
             tbl = QtWidgets.QTableWidget(0, 5)
-            tbl.setHorizontalHeaderLabels(["Channel", "Status", "Res", "Bitrate", "FPS"])
+            tbl.setHorizontalHeaderLabels(["Channel", "Res", "FPS"])
             tbl.horizontalHeader().setStretchLastSection(True)
             tbl.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
             tbl.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -130,25 +131,22 @@ class IPTVChecker(QtWidgets.QMainWindow):
         vg.addWidget(self.te_console)
         v.addWidget(grpC)
 
-        # Status bar
-        self.status = QtWidgets.QStatusBar()
-        self.setStatusBar(self.status)
-        self.setCentralWidget(win)
 
     def _on_pause_resume(self):
-      if not self._is_paused:
-        # Pausing
-        for t in self.threads:
-            t.pause()
-        self.btn_pause.setText("Resume")
-        self.status.showMessage("Paused", 3000)
-      else:
-        # Resuming
-          for t in self.threads:
-              t.resume()
-          self.btn_pause.setText("Pause")
-          self.status.showMessage("Resumed", 3000)
+        if not self._is_paused:
+            # Pausing
+            for t in self.threads:
+                t.pause()
+            self.btn_pause.setText("Resume")
+            self.status.showMessage("Paused", 3000)
+        else:
+            # Resuming
+            for t in self.threads:
+                t.resume()
+            self.btn_pause.setText("Pause")
+            self.status.showMessage("Resumed", 3000)
         self._is_paused = not self._is_paused
+
     
     def stop_check(self):
         for t in self.threads:
@@ -241,12 +239,12 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.status.showMessage("Stopped", 3000)
         threading.Thread(target=self._on_all_done, daemon=True).start()
 
-    def _on_result(self, name, status, res, br, fps):
+    def _on_result(self, name, status, res, fps):
         key = {'UP': 'working', 'BLACK_SCREEN': 'black_screen'}.get(status, 'non_working')
         tbl = getattr(self, f"tbl_{key}")
         row = tbl.rowCount()
         tbl.insertRow(row)
-        for col, txt in enumerate([name, status, res, br, fps]):
+        for col, txt in enumerate([name, status, res, fps,]):
             tbl.setItem(row, col, QtWidgets.QTableWidgetItem(txt))
 
     def _on_log(self, level, msg):
