@@ -1,8 +1,7 @@
-import re
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 class GroupSelectionDialog(QtWidgets.QDialog):
-    def __init__(self, categories, parent=None):
+    def __init__(self, categories: dict, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Select Groups")
         self.resize(700, 400)
@@ -28,7 +27,6 @@ class GroupSelectionDialog(QtWidgets.QDialog):
             setattr(self, f"{cat_name.lower()}_lw", lw)
             layout.addWidget(box)
 
-        # OK / Cancel buttons
         btns = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
         )
@@ -39,9 +37,9 @@ class GroupSelectionDialog(QtWidgets.QDialog):
         main_layout.addLayout(layout)
         main_layout.addWidget(btns)
 
-    def selected(self):
+    def selected(self) -> list[str]:
         """Return list of checked group names."""
-        sel = []
+        sel: list[str] = []
         for attr in ['live_lw', 'movie_lw', 'series_lw']:
             lw = getattr(self, attr)
             for i in range(lw.count()):
