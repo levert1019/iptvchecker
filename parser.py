@@ -1,42 +1,55 @@
 # parser.py
-
 import re
 from collections import OrderedDict
 
 def parse_groups(path: str):
     """
-    Returns:
-      • group_urls: OrderedDict[group_name → list of (channel_name, url)]
-      • categories: dict with keys 'Live','Movie','Series' → list of group_names
+    Parses an M3U, returning:
+      • group_entries: OrderedDict[
+            group_name → list of dict{extinf: str, name: str, url: str}
+        ]
+      • categories:    dict of Live/Movie/Series → list of group_names
     """
     with open(path, encoding='utf-8', errors='ignore') as f:
-        data = f.read()
+        lines = f.read().splitlines()
 
-    # 1) Build the full mapping, preserving file order:
-    group_urls = OrderedDict()
-    pattern = re.compile(
-        r'#EXTINF:[^\n\r]*?group-title="([^"]+)"[^\n\r]*?,([^\n\r]+)\r?\n([^\n\r]+)',
-        re.IGNORECASE
+    group_entries = OrderedDict()
+    # Pattern to capture full EXTINF line, channel name, and URL
+    extinf_re = re.compile(
+        r'(#EXTINF:[^,]*,(.*))$'
     )
-    for m in pattern.finditer(data):
-        grp, name, url = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
-        group_urls.setdefault(grp, []).append((name, url))
+    group_re  = re.compile(r'group-title="([^"]+)"', re.IGNORECASE)
 
-    # 2) Classify each group *into all bins it belongs to*:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = extinf_re.match(line)
+        if m and i+1 < len(lines):
+            raw_extinf = m.group(1)
+            name       = m.group(2).strip()
+            url        = lines[i+1].strip()
+            # extract group
+            gm = group_re.search(line)
+            grp = gm.group(1).strip() if gm else "Ungrouped"
+            entry = {'extinf': raw_extinf, 'name': name, 'url': url}
+            group_entries.setdefault(grp, []).append(entry)
+            i += 2
+        else:
+            i += 1
+
+    # Build categories
     categories = {'Live': [], 'Movie': [], 'Series': []}
-    for grp, entries in group_urls.items():
-        lowers = [u.lower() for _, u in entries]
-        has_movie  = any('movie'  in u for u in lowers)
-        has_series = any('series' in u for u in lowers)
-        has_live   = any('movie' not in u and 'series' not in u for u in lowers)
+    for grp, entries in group_entries.items():
+        urls = [e['url'].lower() for e in entries]
+        has_movie  = any('movie'  in u for u in urls)
+        has_series = any('series' in u for u in urls)
+        has_live   = any(not ('movie' in u or 'series' in u) for u in urls)
 
-        # If a group has *both* movie & series URLs → sort its entries by URL now
         if has_movie and has_series:
-            group_urls[grp] = sorted(entries, key=lambda x: x[1])
+            entries.sort(key=lambda e: e['url'])
 
-        # Allow multi‐bin membership:
         if has_movie:  categories['Movie'].append(grp)
         if has_series: categories['Series'].append(grp)
         if has_live:   categories['Live'].append(grp)
 
-    return group_urls, categories
+    return group_entries, categories
