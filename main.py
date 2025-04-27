@@ -1,6 +1,9 @@
-from parser import parse_groups
-from checker import check_stream
-from gui import run_gui
+# main.py
+from PyQt5.QtWidgets import QApplication
+from main_window import IPTVChecker
 
 if __name__ == "__main__":
-    run_gui()
+    app = QApplication(sys.argv)
+    win = IPTVChecker()
+    win.show()
+    sys.exit(app.exec_())
