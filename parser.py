@@ -1,41 +1,40 @@
+# parser.py
 import re
+from collections import OrderedDict
 
-def parse_groups(path: str) -> tuple[dict, dict]:
+def parse_groups(path: str):
     """
-    Read a local M3U file and return:
-      - group_urls: { group_name: [url, ...], ... }
-      - categories: { 'Live': [...], 'Movie': [...], 'Series': [...] }
-
-    A group belongs to:
-      * Movie if any URL contains 'movie' or 'movies'
-      * Series if any URL contains 'series'
-      * Live if neither 'movie' nor 'movies' nor 'series' in URLs
-
-    Original group order preserved.
+    Returns:
+      group_urls: OrderedDict[group_name, list of (channel_name, url)]
+      categories: dict with keys 'Live','Movie','Series' → list of group_names
     """
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, encoding='utf-8', errors='ignore') as f:
         data = f.read()
 
+    # preserve insertion order of groups
+    group_urls = OrderedDict()
+    # capture group-title, channel name, and next-line URL
     pattern = re.compile(
-        r'#EXTINF:.*?group-title="([^\"]+)".*?\r?\n([^\r\n]+)',
+        r'#EXTINF:[^\n\r]*?group-title="([^"]+)"[^\n\r]*?,([^\n\r]+)\r?\n([^\n\r]+)',
         re.IGNORECASE
     )
-    group_urls = {}
-    for match in pattern.finditer(data):
-        grp = match.group(1)
-        url = match.group(2).strip()
-        group_urls.setdefault(grp, []).append(url)
+    for m in pattern.finditer(data):
+        grp = m.group(1).strip()
+        name = m.group(2).strip()
+        url  = m.group(3).strip()
+        group_urls.setdefault(grp, []).append((name, url))
 
+    # categorize groups by URL keywords, preserving first-seen order
     categories = {'Live': [], 'Movie': [], 'Series': []}
-    for grp, urls in group_urls.items():
-        ul = [u.lower() for u in urls]
-        has_movie = any('movie' in u or 'movies' in u for u in ul)
-        has_series = any('series' in u for u in ul)
-        has_live = any(not ('movie' in u or 'movies' in u or 'series' in u) for u in ul)
-        if has_live:
-            categories['Live'].append(grp)
-        if has_movie:
-            categories['Movie'].append(grp)
-        if has_series:
-            categories['Series'].append(grp)
+    for grp, entries in group_urls.items():
+        # a group can exist in multiple categories
+        seen = set()
+        for _, url in entries:
+            lower = url.lower()
+            if 'movie' in lower and grp not in seen:
+                categories['Movie'].append(grp); seen.add(grp)
+            elif 'series' in lower and grp not in seen:
+                categories['Series'].append(grp); seen.add(grp)
+            elif grp not in seen:
+                categories['Live'].append(grp); seen.add(grp)
     return group_urls, categories
