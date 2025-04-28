@@ -1,11 +1,16 @@
-# workers.py
 import threading, queue
 from PyQt5 import QtCore
 from checker import check_stream
 
 class WorkerThread(QtCore.QThread):
-    # Now emits exactly 5 values: name, status, res, br, fps
-    result = QtCore.pyqtSignal(str, str, str, str, str)
+    """
+    Worker thread for checking streams.
+    Emits:
+      - result(name, status, resolution, fps)
+      - log(level, message)
+    Levels: 'working', 'info', 'error'
+    """
+    result = QtCore.pyqtSignal(str, str, str, str)
     log    = QtCore.pyqtSignal(str, str)
 
     def __init__(self, tasks: queue.Queue, retries: int, timeout: float, parent=None):
@@ -27,22 +32,22 @@ class WorkerThread(QtCore.QThread):
             while self._pause.is_set() and not self._stop.is_set():
                 self.msleep(100)
 
-            status, res, br, fps = 'DOWN', '–', '–', '–'
             for attempt in range(1, self.retries + 1):
                 self.log.emit('info', f"Testing {name} (try {attempt})")
-                st, r, b, f = check_stream(name, url, timeout=self.timeout)
-                status, res, br, fps = st, r, b, f
+                st, res, bitrate, _ = check_stream(name, url, timeout=self.timeout)
+
                 if st == 'UP':
-                    self.log.emit('working', f"{name} OK [{r}, {f} FPS, {b}]")
+                    fps_value = bitrate or '–'
+                    self.log.emit('working', f"{name} WORKING [{res}, {fps_value} FPS]")
+                    # emit name, status, resolution, fps (using bitrate)
+                    self.result.emit(name, st, res, fps_value)
                     break
                 elif st == 'BLACK_SCREEN':
                     self.log.emit('error', f"{name} BLACK SCREEN")
+                    self.result.emit(name, st, '–', '–')
                     break
                 else:
                     self.log.emit('error', f"{name} DOWN; retrying...")
-
-            # Emit exactly five parts
-            self.result.emit(name, status, res, br, fps)
 
     def pause(self):
         self._pause.set()
