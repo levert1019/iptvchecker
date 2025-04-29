@@ -2,20 +2,20 @@ import sys
 import os
 import threading
 import queue
-from PyQt5 import QtWidgets, QtCore
 
+from PyQt5 import QtWidgets, QtCore
 from workers import WorkerThread
 from dialogs import GroupSelectionDialog
 from styles import STYLE_SHEET
 from utils import clean_name, resolution_to_label, format_fps
 from options import OptionsDialog
 
+
 class IPTVChecker(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("DonTV IPTV Checker")
         self.resize(1000, 700)
-
         # Option state
         self.m3u_file = ""
         self.group_urls = {}
@@ -29,13 +29,11 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.update_fps = False
         self.include_untested = False
         self.output_dir = os.getcwd()
-
         # Runtime state
         self.tasks_q = None
         self.threads = []
         self.log_records = []
         self._is_paused = False
-
         self._build_ui()
         self.setStyleSheet(STYLE_SHEET)
 
@@ -60,9 +58,9 @@ class IPTVChecker(QtWidgets.QMainWindow):
         top_h.addStretch()
         for text, slot in [
             ("Options", self._open_options),
-            ("Start",   self.start_check),
-            ("Pause",   self._toggle_pause),
-            ("Stop",    self.stop_check),
+            ("Start", self.start_check),
+            ("Pause", self._toggle_pause),
+            ("Stop", self.stop_check),
         ]:
             btn = QtWidgets.QPushButton(text)
             btn.setFixedSize(130, 45)
@@ -97,8 +95,8 @@ class IPTVChecker(QtWidgets.QMainWindow):
         console_v = QtWidgets.QVBoxLayout(grp_console)
         filter_h = QtWidgets.QHBoxLayout()
         self.cb_show_working = QtWidgets.QCheckBox("Show Working")
-        self.cb_show_info    = QtWidgets.QCheckBox("Show Info")
-        self.cb_show_error   = QtWidgets.QCheckBox("Show Error")
+        self.cb_show_info = QtWidgets.QCheckBox("Show Info")
+        self.cb_show_error = QtWidgets.QCheckBox("Show Error")
         for cb in (self.cb_show_working, self.cb_show_info, self.cb_show_error):
             cb.setChecked(True)
             filter_h.addWidget(cb)
@@ -138,54 +136,60 @@ class IPTVChecker(QtWidgets.QMainWindow):
             self.include_untested = dlg.cb_include_untested.isChecked()
             self.output_dir = dlg.le_out.text()
 
-            def start_check(self):
-    if not self.m3u_file or not self.selected_groups:
-        QtWidgets.QMessageBox.warning(
-            self, "Missing Settings",
-            "Please select an M3U file and at least one group before starting."
-        )
-        return
+    def start_check(self):
+        if not self.m3u_file or not self.selected_groups:
+            QtWidgets.QMessageBox.warning(
+                self, "Missing Settings",
+                "Please select an M3U file and at least one group before starting."
+            )
+            return
 
-    QtWidgets.QMessageBox.information(
-        self, "Groups Selected",
-        f"Selected {len(self.selected_groups)} Groups"
-    )
+        # Print selected groups count to the console
+        print(f"Selected {len(self.selected_groups)} groups")
 
-    # Clear previous results
-    for status in ("working", "black_screen", "non_working"):
-        getattr(self, f"tbl_{status}").setRowCount(0)
+        # Clear previous results
+        for status in ("working", "black_screen", "non_working"):
+            getattr(self, f"tbl_{status}").setRowCount(0)
+        self.log_records.clear()
+        self.te_console.clear()
 
-    self.log_records.clear()
-    self.te_console.clear()
+        # Prepare task queue
+        self.tasks_q = queue.Queue()
+        for grp in self.selected_groups:
+            for entry in self.group_urls.get(grp, []):
+                name = entry['name']
+                url = entry['url']
+                self.tasks_q.put((name, url))
 
-    # Prepare task queue
-    self.tasks_q = queue.Queue()
-    for grp in self.selected_groups:
-        for entry in self.group_urls.get(grp, []):
-            name = entry['name']
-            url = entry['url']
-            self.tasks_q.put((name, url))
+        # Start worker threads
+        self.threads = []
+        for _ in range(self.workers):
+            t = WorkerThread(self.tasks_q, self.retries, self.timeout)
+            t.result.connect(self._on_result)
+            t.log.connect(self._on_log)
+            t.start()
+            self.threads.append(t)
 
-    # Start worker threads
-    self.threads = []
-    for _ in range(self.workers):
-        t = WorkerThread(self.tasks_q, self.retries, self.timeout)
-        t.result.connect(self._on_result)
-        t.log.connect(self._on_log)
-        t.start()
-        self.threads.append(t)
+        self.status.showMessage("Checking started", 3000)
 
-    self.status.showMessage("Checking started", 3000)
-
-
-    def _on_result(self, name, status, res, br, fps):
-        key = 'working' if status=='UP' else ('black_screen' if status=='BLACK_SCREEN' else 'non_working')
+    def _on_result(self, name, status, res, fps):
+        key = 'working' if status == 'UP' else ('black_screen' if status == 'BLACK_SCREEN' else 'non_working')
         tbl = getattr(self, f"tbl_{key}")
         row = tbl.rowCount()
         tbl.insertRow(row)
         tbl.setItem(row, 0, QtWidgets.QTableWidgetItem(clean_name(name)))
-        tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(resolution_to_label(res) if self.update_quality else res))
-        tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(format_fps(fps) if self.update_fps else fps))
+        tbl.setItem(
+            row, 1,
+            QtWidgets.QTableWidgetItem(
+                resolution_to_label(res) if self.update_quality else res
+            )
+        )
+        tbl.setItem(
+            row, 2,
+            QtWidgets.QTableWidgetItem(
+                format_fps(fps) if self.update_fps else fps
+            )
+        )
 
     def _on_log(self, level, msg):
         self.log_records.append((level, msg))
@@ -193,7 +197,11 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
     def _refresh_console(self):
         self.te_console.clear()
-        show = {'working':self.cb_show_working.isChecked(), 'info':self.cb_show_info.isChecked(), 'error':self.cb_show_error.isChecked()}
+        show = {
+            'working': self.cb_show_working.isChecked(),
+            'info': self.cb_show_info.isChecked(),
+            'error': self.cb_show_error.isChecked()
+        }
         for lvl, m in self.log_records:
             if show.get(lvl, False):
                 self.te_console.append(m)
@@ -214,16 +222,16 @@ class IPTVChecker(QtWidgets.QMainWindow):
             t.wait()
         if self.split:
             base = os.path.splitext(os.path.basename(self.m3u_file))[0]
-            for status, suffix in [('working','_working'),('black_screen','_blackscreen'),('non_working','_notworking')]:
+            for status, suffix in [('working', '_working'), ('black_screen', '_blackscreen'), ('non_working', '_notworking')]:
                 fn = os.path.join(self.output_dir, f"{base}{suffix}.m3u")
-                with open(fn,'w',encoding='utf-8') as f:
+                with open(fn, 'w', encoding='utf-8') as f:
                     tbl = getattr(self, f"tbl_{status}")
                     for row in range(tbl.rowCount()):
-                        nm = tbl.item(row,0).text()
+                        nm = tbl.item(row, 0).text()
                         for grp, lst in self.group_urls.items():
                             for n, url in lst:
-                                if n==nm:
-                                    f.write(url+"\n")
+                                if n == nm:
+                                    f.write(url + "\n")
                                     break
         self.status.showMessage("All tasks complete", 5000)
 
@@ -233,6 +241,7 @@ def run_gui():
     win = IPTVChecker()
     win.show()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     run_gui()
