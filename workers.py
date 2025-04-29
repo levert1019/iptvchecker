@@ -38,16 +38,16 @@ class WorkerThread(QtCore.QThread):
 
                 if st == 'UP':
                     fps_value = bitrate or '–'
-                    self.log.emit('working', f"{name} WORKING [{res}, {fps_value} FPS]")
+                    self.log.emit('working', f"Channel: {name} is WORKING [{res}, {fps_value} FPS]")
                     # emit name, status, resolution, fps (using bitrate)
                     self.result.emit(name, st, res, fps_value)
                     break
                 elif st == 'BLACK_SCREEN':
-                    self.log.emit('error', f"{name} BLACK SCREEN")
+                    self.log.emit('error', f"Channel: {name} has a BLACK SCREEN")
                     self.result.emit(name, st, '–', '–')
                     break
                 else:
-                    self.log.emit('error', f"{name} DOWN; retrying...")
+                    self.log.emit('error', f"Channel: {name} is DOWN; retrying…")
 
     def pause(self):
         self._pause.set()

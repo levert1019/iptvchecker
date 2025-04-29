@@ -1,7 +1,0 @@
-#EXTM3U
-#EXTINF:0 CUID="38465" tvg-chno="null" tvg-name="### ALLGEMEIN ###" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### ALLGEMEIN ###  –ᵇᵖˢ
-http://dontv.shop/player/img/logo3.png
-#EXTINF:0 CUID="38464" tvg-chno="null" tvg-name="### DOKUS UND NEWS ###" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### DOKUS UND NEWS ###  –ᵇᵖˢ
-http://dontv.shop/player/img/logo3.png
-#EXTINF:0 CUID="38463" tvg-chno="null" tvg-name="### KINDERSENDER ###" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### KINDERSENDER ###  –ᵇᵖˢ
-http://dontv.shop/player/img/logo3.png
