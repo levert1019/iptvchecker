@@ -265,16 +265,13 @@ def _on_result(self, name, status, res, fps):
             t.wait()
         QtCore.QTimer.singleShot(0, self._start_writing)
 
-    def _start_writing(self):
-        threading.Thread(target=self._write_output_files, daemon=True).start()
-
-        def _write_output_files(self):
+    def _write_output_files(self):
         if not self.m3u_file:
             return
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         paths = []
 
-        # First, gather which channels were actually tested and their display names
+        # Gather tested channels and their display names
         tested = set()
         display_map = {}
         for status in ('working', 'black_screen', 'non_working'):
@@ -285,65 +282,51 @@ def _on_result(self, name, status, res, fps):
                 tested.add(orig)
                 display_map[orig] = item.text()
 
-        def write_list(path, orig_list):
-            """Write an M3U given a list of original channel names."""
+        def write_list(path, names):
             with open(path, 'w', encoding='utf-8') as f:
                 f.write('#EXTM3U\n')
-                for orig in orig_list:
+                for orig in names:
                     entry = self.entry_map.get(orig)
                     if not entry:
                         continue
                     if orig in tested:
-                        # Rebuild EXTINF with updated display name
+                        # Rebuild EXTINF using updated display name
                         prefix = entry['extinf'].split(',', 1)[0]
                         disp = display_map[orig]
                         f.write(f"{prefix},{disp}\n")
                     else:
-                        # Untested: write original EXTINF
+                        # Untested or unselected: write original EXTINF
                         f.write(entry['extinf'] + "\n")
                     f.write(entry['url'] + "\n")
             paths.append(path)
 
-        # 1) Working channels
-        working_names = [
+        # 1) Always write working list
+        working = [
             self.tbl_working.item(r, 0).data(QtCore.Qt.UserRole)
             for r in range(self.tbl_working.rowCount())
         ]
-        write_list(
-            os.path.join(self.output_dir, f"{base}_working.m3u"),
-            working_names
-        )
+        write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), working)
 
-        # 2) Black-screen channels (if splitting)
+        # 2) If splitting, write black_screen & non_working
         if self.split:
-            black_names = [
+            blacks = [
                 self.tbl_black_screen.item(r, 0).data(QtCore.Qt.UserRole)
                 for r in range(self.tbl_black_screen.rowCount())
             ]
-            write_list(
-                os.path.join(self.output_dir, f"{base}_blackscreen.m3u"),
-                black_names
-            )
+            write_list(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), blacks)
 
-            # 3) Non-working channels
-            nonw_names = [
+            nonw = [
                 self.tbl_non_working.item(r, 0).data(QtCore.Qt.UserRole)
                 for r in range(self.tbl_non_working.rowCount())
             ]
-            write_list(
-                os.path.join(self.output_dir, f"{base}_notworking.m3u"),
-                nonw_names
-            )
+            write_list(os.path.join(self.output_dir, f"{base}_notworking.m3u"), nonw)
 
-        # 4) All channels (if Include Untested is checked)
+        # 3) If include_untested, write the “all” file from every entry
         if self.include_untested:
             all_names = list(self.entry_map.keys())
-            write_list(
-                os.path.join(self.output_dir, f"{base}_all.m3u"),
-                all_names
-            )
+            write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), all_names)
 
-        # Kick back to GUI thread to log completion
+        # Finally, notify GUI thread
         self.written = paths
         QtCore.QTimer.singleShot(0, self._on_files_written)
 
