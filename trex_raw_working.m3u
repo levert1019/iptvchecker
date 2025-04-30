@@ -1,177 +1,177 @@
 #EXTM3U
 #EXTINF:0 CUID="30856" tvg-name="RTL LIVING" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/png/HR/rtlliving.png" group-title="SRB",RTL LIVINGᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/110864.ts
-#EXTINF:0 CUID="13694" tvg-name="RTLZWEI" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/rtl2hd.png" group-title="DE - ALLGEMEIN",RTLZWEIᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411629.ts
-#EXTINF:0 CUID="13707" tvg-name="PROSIEBEN FUN" tvg-ID="don.prosieben_fun.de" tvg-logo="https://dontv.shop/png/DE/pro7fun.png" group-title="DE - ALLGEMEIN",PROSIEBEN FUNˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411622.ts
+#EXTINF:0 CUID="15054" tvg-name="SAT.1 EMOTIONS" tvg-ID="don.sat1_emotions.de" tvg-logo="https://dontv.shop/png/DE/sat1emotionshd.png" group-title="DE - UNTERHALTUNG",SAT.1 EMOTIONSˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567658.ts
 #EXTINF:0 CUID="13709" tvg-name="HEIMATKANAL" tvg-ID="don.heimatkanal.de" tvg-logo="https://dontv.shop/png/DE/heimatkanal.png" group-title="DE - ALLGEMEIN",HEIMATKANALˢᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411711.ts
-#EXTINF:0 CUID="13688" tvg-name="RTL 4K" tvg-ID="don.rtl.de" tvg-logo="https://dontv.shop/png/DE/rtlhd.png" group-title="DE - ALLGEMEIN",RTL 4KᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411632.ts
-#EXTINF:0 CUID="13703" tvg-name="PROSIEBEN" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBENᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411624.ts
-#EXTINF:0 CUID="13689" tvg-name="RTL PLUS" tvg-ID="don.rtl_plus.de" tvg-logo="https://dontv.shop/png/DE/rtlplushd.png" group-title="DE - ALLGEMEIN",RTL PLUSᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1828542.ts
-#EXTINF:0 CUID="13703" tvg-name="PROSIEBEN" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBENᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411624.ts
-#EXTINF:0 CUID="37973" tvg-name="ZDF" tvg-ID="don.zdf.de" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - MagentaTV",ZDFᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836183.ts
-#EXTINF:0 CUID="38112" tvg-name="TELE 5" tvg-ID="don.tele_5.de" tvg-logo="https://dontv.shop/png/DE/tele5hd.png" group-title="DE - MagentaTV",TELE 5ᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836044.ts
-#EXTINF:0 CUID="13697" tvg-name="RTL NITRO" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlnitro.png" group-title="DE - ALLGEMEIN",RTL NITROᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411610.ts
-#EXTINF:0 CUID="37973" tvg-name="ZDF" tvg-ID="don.zdf.de" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - MagentaTV",ZDFᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836183.ts
-#EXTINF:0 CUID="13685" tvg-name="DAS ERSTE" tvg-ID="don.das_erste.de" tvg-logo="https://dontv.shop/png/DE/daserstehd.png" group-title="Backup",DAS ERSTEᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/578802.ts
+#EXTINF:0 CUID="13707" tvg-name="PROSIEBEN FUN" tvg-ID="don.prosieben_fun.de" tvg-logo="https://dontv.shop/png/DE/pro7fun.png" group-title="DE - ALLGEMEIN",PROSIEBEN FUNˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411622.ts
 #EXTINF:0 CUID="13694" tvg-name="RTLZWEI" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/rtl2hd.png" group-title="DE - ALLGEMEIN",RTLZWEIᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411629.ts
+#EXTINF:0 CUID="13703" tvg-name="PROSIEBEN" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBENᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411624.ts
+#EXTINF:0 CUID="13690" tvg-name="RTL" tvg-ID="don.rtl.de" tvg-logo="https://dontv.shop/png/DE/rtl.png" group-title="Backup",RTLˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411631.ts
+#EXTINF:0 CUID="13721" tvg-name="VOXUP" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxuphd.png" group-title="DE - ALLGEMEIN",VOXUPᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757228.ts
 #EXTINF:0 CUID="13699" tvg-name="RTL CRIME" tvg-ID="don.rtl_crime.de" tvg-logo="https://dontv.shop/png/DE/rtlcrime.png" group-title="Backup",RTL CRIMEˢᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411625.ts
-#EXTINF:0 CUID="13716" tvg-name="KABEL EINS" tvg-ID="don.kabel_eins.de" tvg-logo="https://dontv.shop/png/DE/kabeleinshd.png" group-title="Backup",KABEL EINSᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411616.ts
+#EXTINF:0 CUID="13688" tvg-name="RTL 4K" tvg-ID="don.rtl.de" tvg-logo="https://dontv.shop/png/DE/rtlhd.png" group-title="DE - ALLGEMEIN",RTL 4KᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411632.ts
+#EXTINF:0 CUID="13697" tvg-name="RTL NITRO" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlnitro.png" group-title="DE - ALLGEMEIN",RTL NITROᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411610.ts
+#EXTINF:0 CUID="13721" tvg-name="VOXUP" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxuphd.png" group-title="DE - ALLGEMEIN",VOXUPᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757228.ts
+#EXTINF:0 CUID="37973" tvg-name="ZDF" tvg-ID="don.zdf.de" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - MagentaTV",ZDFᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836183.ts
+#EXTINF:0 CUID="13694" tvg-name="RTLZWEI" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/rtl2hd.png" group-title="DE - ALLGEMEIN",RTLZWEIᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411629.ts
 #EXTINF:0 CUID="13704" tvg-name="PRO7SAT.1" tvg-ID="dummy.epg" tvg-logo="https://dontv.shop/png/DE/pro7sat1.png" group-title="DE - ALLGEMEIN",PRO7SAT.1ˢᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/692605.ts
+#EXTINF:0 CUID="13703" tvg-name="PROSIEBEN" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBENᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411624.ts
 #EXTINF:0 CUID="13713" tvg-name="SAT.1 GOLD" tvg-ID="don.sat1_gold.de" tvg-logo="https://dontv.shop/png/DE/sat1goldhd.png" group-title="Backup",SAT.1 GOLDᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411617.ts
-#EXTINF:0 CUID="13721" tvg-name="VOXUP" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxuphd.png" group-title="DE - ALLGEMEIN",VOXUPˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757228.ts
+#EXTINF:0 CUID="37973" tvg-name="ZDF" tvg-ID="don.zdf.de" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - MagentaTV",ZDFᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836183.ts
+#EXTINF:0 CUID="13689" tvg-name="RTL PLUS" tvg-ID="don.rtl_plus.de" tvg-logo="https://dontv.shop/png/DE/rtlplushd.png" group-title="DE - ALLGEMEIN",RTL PLUSᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1828542.ts
+#EXTINF:0 CUID="13716" tvg-name="KABEL EINS" tvg-ID="don.kabel_eins.de" tvg-logo="https://dontv.shop/png/DE/kabeleinshd.png" group-title="Backup",KABEL EINSᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411616.ts
+#EXTINF:0 CUID="13685" tvg-name="DAS ERSTE" tvg-ID="don.das_erste.de" tvg-logo="https://dontv.shop/png/DE/daserstehd.png" group-title="Backup",DAS ERSTEᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/578802.ts
 #EXTINF:0 CUID="13695" tvg-name="RTL UP" tvg-ID="don.rtlup.de" tvg-logo="https://dontv.shop/png/DE/rtlup.png" group-title="Backup",RTL UPᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411323.ts
 #EXTINF:0 CUID="13719" tvg-name="VOX" tvg-ID="don.vox.de" tvg-logo="https://dontv.shop/png/DE/voxhd.png" group-title="Backup",VOXᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411614.ts
-#EXTINF:0 CUID="37989" tvg-name="SAT.1" tvg-ID="don.sat1.de" tvg-logo="https://dontv.shop/png/DE/sat1hd.png" group-title="DE - MagentaTV",SAT.1ˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836167.ts
-#EXTINF:0 CUID="13706" tvg-name="PROSIEBEN MAXX" tvg-ID="don.prosieben_maxx.de" tvg-logo="https://dontv.shop/png/DE/pro7maxhd.png" group-title="Backup",PROSIEBEN MAXXᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411621.ts
-#EXTINF:0 CUID="13690" tvg-name="RTL" tvg-ID="don.rtl.de" tvg-logo="https://dontv.shop/png/DE/rtl.png" group-title="Backup",RTLˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411631.ts
-#EXTINF:0 CUID="38101" tvg-name="SIXX" tvg-ID="don.sixx.de" tvg-logo="https://dontv.shop/png/DE/sixxhd.png" group-title="DE - MagentaTV",SIXXᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836055.ts
-#EXTINF:0 CUID="15126" tvg-name="KABEL EINS CLASSICS" tvg-ID="don.kabel_eins_classics.de" tvg-logo="https://dontv.shop/png/DE/kabeleinsclassichd.png" group-title="DE - UNTERHALTUNG",KABEL EINS CLASSICSᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567587.ts
-#EXTINF:0 CUID="13721" tvg-name="VOXUP" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxuphd.png" group-title="DE - ALLGEMEIN",VOXUPˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757228.ts
 #EXTINF:0 CUID="38010" tvg-name="3SAT" tvg-ID="don.3sat.de" tvg-logo="https://dontv.shop/png/DE/3sathd.png" group-title="DE - MagentaTV",3SATᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836146.ts
-#EXTINF:0 CUID="38017" tvg-name="ARD-ALPHA" tvg-ID="don.ard_alpha.de" tvg-logo="https://dontv.shop/png/DE/ardalphahd.png" group-title="DE - MagentaTV",ARD-ALPHAᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836139.ts
-#EXTINF:0 CUID="13732" tvg-name="QVC ZWEI" tvg-ID="don.qvc2.de" tvg-logo="https://dontv.shop/png/DE/qvc2.png" group-title="DE - ALLGEMEIN",QVC ZWEIˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540016.ts
-#EXTINF:0 CUID="13726" tvg-name="ARD" tvg-ID="don.ard_das_erste.de" tvg-logo="https://dontv.shop/png/DE/ard.png" group-title="DE - ALLGEMEIN",ARDˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1028966.ts
-#EXTINF:0 CUID="30426" tvg-name="RTL PASSION" tvg-ID="don.rtl_passion.hr" tvg-logo="http://dontv.shop/png/HR/rtlpassion.png" group-title="HR",RTL PASSIONᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/110694.ts
-#EXTINF:0 CUID="13697" tvg-name="RTL NITRO" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlnitro.png" group-title="DE - ALLGEMEIN",RTL NITROᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411610.ts
-#EXTINF:0 CUID="15148" tvg-name="ROMANCE TV" tvg-ID="don.romance_tv.de" tvg-logo="https://dontv.shop/png/DE/romancetvhd.png" group-title="DE - UNTERHALTUNG",ROMANCE TVᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567565.ts
-#EXTINF:0 CUID="13741" tvg-name="ZDFNEO" tvg-ID="don.zdfneo.de" tvg-logo="https://dontv.shop/png/DE/zdfneohd.png" group-title="Backup",ZDFNEOᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757227.ts
-#EXTINF:0 CUID="38011" tvg-name="A.TV" tvg-ID="don.atv.de" tvg-logo="https://dontv.shop/png/DE/atv.png" group-title="DE - MagentaTV",A.TVᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836145.ts
-#EXTINF:0 CUID="38101" tvg-name="SIXX" tvg-ID="don.sixx.de" tvg-logo="https://dontv.shop/png/DE/sixxhd.png" group-title="DE - MagentaTV",SIXXᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836055.ts
-#EXTINF:0 CUID="38125" tvg-name="WELT" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welthd.png" group-title="DE - MagentaTV",WELTᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836031.ts
-#EXTINF:0 CUID="13744" tvg-name="WELT DER WUNDER TV" tvg-ID="don.welt_der_wunder_tv.de" tvg-logo="https://dontv.shop/png/DE/weltderwunder.png" group-title="DE - ALLGEMEIN",WELT DER WUNDER TVᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411330.ts
-#EXTINF:0 CUID="38125" tvg-name="WELT" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welthd.png" group-title="DE - MagentaTV",WELTᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836031.ts
-#EXTINF:0 CUID="13737" tvg-name="BILD LIVE" tvg-ID="dummy.epg" tvg-logo="https://dontv.shop/png/DE/bild.png" group-title="DE - ALLGEMEIN",BILD LIVEᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/707225.ts
-#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᵁᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836066.ts
+#EXTINF:0 CUID="13706" tvg-name="PROSIEBEN MAXX" tvg-ID="don.prosieben_maxx.de" tvg-logo="https://dontv.shop/png/DE/pro7maxhd.png" group-title="Backup",PROSIEBEN MAXXᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411621.ts
+#EXTINF:0 CUID="15126" tvg-name="KABEL EINS CLASSICS" tvg-ID="don.kabel_eins_classics.de" tvg-logo="https://dontv.shop/png/DE/kabeleinsclassichd.png" group-title="DE - UNTERHALTUNG",KABEL EINS CLASSICSᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567587.ts
+#EXTINF:0 CUID="38112" tvg-name="TELE 5" tvg-ID="don.tele_5.de" tvg-logo="https://dontv.shop/png/DE/tele5hd.png" group-title="DE - MagentaTV",TELE 5ᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836044.ts
 #EXTINF:0 CUID="37989" tvg-name="SAT.1" tvg-ID="don.sat1.de" tvg-logo="https://dontv.shop/png/DE/sat1hd.png" group-title="DE - MagentaTV",SAT.1ˢᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836167.ts
-#EXTINF:0 CUID="38111" tvg-name="TAGESSCHAU 24" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/tagesschauhd.png" group-title="DE - MagentaTV",TAGESSCHAU 24ᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836045.ts
+#EXTINF:0 CUID="13732" tvg-name="QVC ZWEI" tvg-ID="don.qvc2.de" tvg-logo="https://dontv.shop/png/DE/qvc2.png" group-title="DE - ALLGEMEIN",QVC ZWEIˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540016.ts
+#EXTINF:0 CUID="15148" tvg-name="ROMANCE TV" tvg-ID="don.romance_tv.de" tvg-logo="https://dontv.shop/png/DE/romancetvhd.png" group-title="DE - UNTERHALTUNG",ROMANCE TVᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567565.ts
+#EXTINF:0 CUID="13697" tvg-name="RTL NITRO" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlnitro.png" group-title="DE - ALLGEMEIN",RTL NITROᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411610.ts
+#EXTINF:0 CUID="13741" tvg-name="ZDFNEO" tvg-ID="don.zdfneo.de" tvg-logo="https://dontv.shop/png/DE/zdfneohd.png" group-title="Backup",ZDFNEOᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757227.ts
+#EXTINF:0 CUID="13726" tvg-name="ARD" tvg-ID="don.ard_das_erste.de" tvg-logo="https://dontv.shop/png/DE/ard.png" group-title="DE - ALLGEMEIN",ARDˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1028966.ts
+#EXTINF:0 CUID="38011" tvg-name="A.TV" tvg-ID="don.atv.de" tvg-logo="https://dontv.shop/png/DE/atv.png" group-title="DE - MagentaTV",A.TVᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836145.ts
+#EXTINF:0 CUID="38017" tvg-name="ARD-ALPHA" tvg-ID="don.ard_alpha.de" tvg-logo="https://dontv.shop/png/DE/ardalphahd.png" group-title="DE - MagentaTV",ARD-ALPHAᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836139.ts
+#EXTINF:0 CUID="38101" tvg-name="SIXX" tvg-ID="don.sixx.de" tvg-logo="https://dontv.shop/png/DE/sixxhd.png" group-title="DE - MagentaTV",SIXX
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836055.ts
+#EXTINF:0 CUID="37989" tvg-name="SAT.1" tvg-ID="don.sat1.de" tvg-logo="https://dontv.shop/png/DE/sat1hd.png" group-title="DE - MagentaTV",SAT.1ˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836167.ts
 #EXTINF:0 CUID="37974" tvg-name="ZDF INFO" tvg-ID="don.zdfinfo.de" tvg-logo="https://dontv.shop/png/DE/zdfinfohd.png" group-title="DE - MagentaTV",ZDF INFOᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836182.ts
-#EXTINF:0 CUID="14862" tvg-name="SKY NATURE" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/skynature.png" group-title="DE - WOW",SKY NATUREᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1553022.ts
+#EXTINF:0 CUID="38125" tvg-name="WELT" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welthd.png" group-title="DE - MagentaTV",WELTᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836031.ts
+#EXTINF:0 CUID="38125" tvg-name="WELT" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welthd.png" group-title="DE - MagentaTV",WELTᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836031.ts
 #EXTINF:0 CUID="13743" tvg-name="CURIOSITY CHANNEL" tvg-ID="don.curiosity_channel.de" tvg-logo="https://dontv.shop/png/DE/curiositychannel.png" group-title="DE - ALLGEMEIN",CURIOSITY CHANNELᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411338.ts
-#EXTINF:0 CUID="38018" tvg-name="ARTE" tvg-ID="don.arte.de" tvg-logo="https://dontv.shop/png/DE/artehd.png" group-title="DE - MagentaTV",ARTEᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836138.ts
-#EXTINF:0 CUID="13757" tvg-name="MDR THÜRINGEN" tvg-ID="don.mdr.de" tvg-logo="https://dontv.shop/png/DE/mdrthuringen.png" group-title="DE - ALLGEMEIN",MDR THÜRINGENᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411315.ts
-#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᵁᴴᴰN/A FPS
+#EXTINF:0 CUID="14862" tvg-name="SKY NATURE" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/skynature.png" group-title="DE - WOW",SKY NATUREᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1553022.ts
+#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836066.ts
-#EXTINF:0 CUID="13735" tvg-name="HAMBURG 1" tvg-ID="don.hamburg_1.de" tvg-logo="https://dontv.shop/png/DE/hamburg1.png" group-title="DE - ALLGEMEIN",HAMBURG 1ᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1004968.ts
-#EXTINF:0 CUID="13733" tvg-name="UHD1 BY ASTRA" tvg-ID="don.uhd1.de" tvg-logo="https://dontv.shop/png/DE/uhd1.png" group-title="DE - ALLGEMEIN",UHD1 BY ASTRAᵁᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540014.ts
+#EXTINF:0 CUID="30426" tvg-name="RTL PASSION" tvg-ID="don.rtl_passion.hr" tvg-logo="http://dontv.shop/png/HR/rtlpassion.png" group-title="HR",RTL PASSIONᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/110694.ts
 #EXTINF:0 CUID="30366" tvg-name="EURONEWS" tvg-ID="don.euronews_hd_sr.rs" tvg-logo="http://dontv.shop/png/SRB/euronews.png" group-title="SRB",EURONEWSᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/865452.ts
 #EXTINF:0 CUID="14860" tvg-name="SKY DOCUMENTARIES" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/skydocumentaries.png" group-title="DE - WOW",SKY DOCUMENTARIESᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1553020.ts
-#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᵁᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836066.ts
-#EXTINF:0 CUID="38087" tvg-name="PHOENIX" tvg-ID="don.phoenix.de" tvg-logo="https://dontv.shop/png/DE/phoenixhd.png" group-title="DE - MagentaTV",PHOENIXᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836069.ts
-#EXTINF:0 CUID="38051" tvg-name="HSE" tvg-ID="don.hse.de" tvg-logo="https://dontv.shop/png/DE/hse.png" group-title="DE - MagentaTV",HSEᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836105.ts
-#EXTINF:0 CUID="16081" tvg-name="SERVUS TV" tvg-ID="don.servus_tv.at" tvg-logo="https://dontv.shop/png/DE/servustv.png" group-title="AUT",SERVUS TVᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1004560.ts
+#EXTINF:0 CUID="13744" tvg-name="WELT DER WUNDER TV" tvg-ID="don.welt_der_wunder_tv.de" tvg-logo="https://dontv.shop/png/DE/weltderwunder.png" group-title="DE - ALLGEMEIN",WELT DER WUNDER TVᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411330.ts
+#EXTINF:0 CUID="13757" tvg-name="MDR THÜRINGEN" tvg-ID="don.mdr.de" tvg-logo="https://dontv.shop/png/DE/mdrthuringen.png" group-title="DE - ALLGEMEIN",MDR THÜRINGENᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411315.ts
+#EXTINF:0 CUID="13737" tvg-name="BILD LIVE" tvg-ID="dummy.epg" tvg-logo="https://dontv.shop/png/DE/bild.png" group-title="DE - ALLGEMEIN",BILD LIVEᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/707225.ts
 #EXTINF:0 CUID="38070" tvg-name="N-TV" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/ntvhd.png" group-title="DE - MagentaTV",N-TVᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836086.ts
-#EXTINF:0 CUID="13772" tvg-name="DEUTSCHMUSIK FERNSEHEN" tvg-ID="deutschesmusikfernsehen.de" tvg-logo="https://dontv.shop/png/DE/deutschesmusikfernsehen.png" group-title="DE - ALLGEMEIN",DEUTSCHMUSIK FERNSEHENᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447902.ts
-#EXTINF:0 CUID="38055" tvg-name="K-TV" tvg-ID="don.k_tv.de" tvg-logo="https://dontv.shop/png/DE/ktv.png" group-title="DE - MagentaTV",K-TVˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836101.ts
-#EXTINF:0 CUID="13769" tvg-name="FOLX TV" tvg-ID="don.folx_music_television.de" tvg-logo="https://dontv.shop/png/DE/folx.png" group-title="DE - ALLGEMEIN",FOLX TVᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447903.ts
-#EXTINF:0 CUID="13760" tvg-name="NDR HAMBURG" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrhh.png" group-title="DE - ALLGEMEIN",NDR HAMBURGᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411314.ts
-#EXTINF:0 CUID="13753" tvg-name="WDR Köln" tvg-ID="don.wdr_fernsehen_koln.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/wdr+.png" group-title="DE - ALLGEMEIN",WDR KölnᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411296.ts
-#EXTINF:0 CUID="13754" tvg-name="RBB" tvg-ID="don.rbb.de" tvg-logo="https://dontv.shop/png/DE/rbb.png" group-title="DE - ALLGEMEIN",RBBᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411299.ts
+#EXTINF:0 CUID="38018" tvg-name="ARTE" tvg-ID="don.arte.de" tvg-logo="https://dontv.shop/png/DE/artehd.png" group-title="DE - MagentaTV",ARTEᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836138.ts
+#EXTINF:0 CUID="38111" tvg-name="TAGESSCHAU 24" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/tagesschauhd.png" group-title="DE - MagentaTV",TAGESSCHAU 24ᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836045.ts
+#EXTINF:0 CUID="13733" tvg-name="UHD1 BY ASTRA" tvg-ID="don.uhd1.de" tvg-logo="https://dontv.shop/png/DE/uhd1.png" group-title="DE - ALLGEMEIN",UHD1 BY ASTRAᵁᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540014.ts
+#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836066.ts
+#EXTINF:0 CUID="13735" tvg-name="HAMBURG 1" tvg-ID="don.hamburg_1.de" tvg-logo="https://dontv.shop/png/DE/hamburg1.png" group-title="DE - ALLGEMEIN",HAMBURG 1ᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1004968.ts
 #EXTINF:0 CUID="13775" tvg-name="MELODIE TV" tvg-ID="don.melodie_tv.de" tvg-logo="http://dontv.shop/png/DE/melodietv.png" group-title="DE - ALLGEMEIN",MELODIE TVᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447898.ts
-#EXTINF:0 CUID="13758" tvg-name="NDR NIEDERSACHSEN" tvg-ID="don.ndr_fernsehen_niedersachsen.de" tvg-logo="https://dontv.shop/png/DE/ndr1nieders.png" group-title="DE - ALLGEMEIN",NDR NIEDERSACHSENˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411312.ts
-#EXTINF:0 CUID="13781" tvg-name="DISNEY CHANNEL" tvg-ID="don.disney_channel.de" tvg-logo="https://dontv.shop/png/DE/disneyhd.png" group-title="Backup",DISNEY CHANNELᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411531.ts
-#EXTINF:0 CUID="15120" tvg-name="HR" tvg-ID="don.hr.de" tvg-logo="https://dontv.shop/png/DE/hr.png" group-title="DE - UNTERHALTUNG",HRᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567593.ts
-#EXTINF:0 CUID="38031" tvg-name="DELUXE MUSIC" tvg-ID="don.deluxe_music.de" tvg-logo="https://dontv.shop/png/DE/deluxehd.png" group-title="DE - MagentaTV",DELUXE MUSICᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836125.ts
-#EXTINF:0 CUID="30845" tvg-name="CARTOON NETWORK" tvg-ID="don.cartoon_network_hd_sr.rs" tvg-logo="http://dontv.shop/png/SRB/cartoonnetworkrs.png" group-title="SRB",CARTOON NETWORKˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/110897.ts
-#EXTINF:0 CUID="38115" tvg-name="TOGGO PLUS" tvg-ID="don.toggo_plus.de" tvg-logo="https://dontv.shop/png/DE/toggohd.png" group-title="DE - MagentaTV",TOGGO PLUSˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836041.ts
-#EXTINF:0 CUID="13789" tvg-name="NICK JR." tvg-ID="don.nick_jr.de" tvg-logo="https://dontv.shop/png/DE/nickjr.png" group-title="DE - ALLGEMEIN",NICK JR.ᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411375.ts
-#EXTINF:0 CUID="30833" tvg-name="NICKELODEON" tvg-ID="don.nickelodeon_hd.rs" tvg-logo="https://dontv.shop/png/SRB/nickelodeon.png" group-title="SRB",NICKELODEONˢᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/881789.ts
+#EXTINF:0 CUID="38090" tvg-name="QVC" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - MagentaTV",QVCᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836066.ts
+#EXTINF:0 CUID="13760" tvg-name="NDR HAMBURG" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrhh.png" group-title="DE - ALLGEMEIN",NDR HAMBURGᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411314.ts
+#EXTINF:0 CUID="38051" tvg-name="HSE" tvg-ID="don.hse.de" tvg-logo="https://dontv.shop/png/DE/hse.png" group-title="DE - MagentaTV",HSEᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836105.ts
+#EXTINF:0 CUID="38055" tvg-name="K-TV" tvg-ID="don.k_tv.de" tvg-logo="https://dontv.shop/png/DE/ktv.png" group-title="DE - MagentaTV",K-TVˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836101.ts
+#EXTINF:0 CUID="13772" tvg-name="DEUTSCHMUSIK FERNSEHEN" tvg-ID="deutschesmusikfernsehen.de" tvg-logo="https://dontv.shop/png/DE/deutschesmusikfernsehen.png" group-title="DE - ALLGEMEIN",DEUTSCHMUSIK FERNSEHENᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447902.ts
+#EXTINF:0 CUID="38087" tvg-name="PHOENIX" tvg-ID="don.phoenix.de" tvg-logo="https://dontv.shop/png/DE/phoenixhd.png" group-title="DE - MagentaTV",PHOENIXᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836069.ts
 #EXTINF:0 CUID="30804" tvg-name="HGTV" tvg-ID="don.home_and_garden_tv.rs" tvg-logo="http://dontv.shop/png/DE/hgtvhd.png" group-title="EXYU - FILMSKI KANALI",HGTVᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1469080.ts
 #EXTINF:0 CUID="15058" tvg-name="BR" tvg-ID="don.br.de" tvg-logo="https://dontv.shop/png/DE/brhd.png" group-title="DE - UNTERHALTUNG",BRᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567654.ts
-#EXTINF:0 CUID="15072" tvg-name="WDR DORTMUND" tvg-ID="don.wdr.de" tvg-logo="https://dontv.shop/png/DE/wdrdortmund.png" group-title="DE - UNTERHALTUNG",WDR DORTMUNDᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567640.ts
-#EXTINF:0 CUID="38056" tvg-name="KIKA" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - MagentaTV",KIKAᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836100.ts
+#EXTINF:0 CUID="38031" tvg-name="DELUXE MUSIC" tvg-ID="don.deluxe_music.de" tvg-logo="https://dontv.shop/png/DE/deluxehd.png" group-title="DE - MagentaTV",DELUXE MUSICᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836125.ts
+#EXTINF:0 CUID="13754" tvg-name="RBB" tvg-ID="don.rbb.de" tvg-logo="https://dontv.shop/png/DE/rbb.png" group-title="DE - ALLGEMEIN",RBBᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411299.ts
+#EXTINF:0 CUID="13753" tvg-name="WDR Köln" tvg-ID="don.wdr_fernsehen_koln.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/wdr+.png" group-title="DE - ALLGEMEIN",WDR KölnᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411296.ts
+#EXTINF:0 CUID="16081" tvg-name="SERVUS TV" tvg-ID="don.servus_tv.at" tvg-logo="https://dontv.shop/png/DE/servustv.png" group-title="AUT",SERVUS TVᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1004560.ts
+#EXTINF:0 CUID="13789" tvg-name="NICK JR." tvg-ID="don.nick_jr.de" tvg-logo="https://dontv.shop/png/DE/nickjr.png" group-title="DE - ALLGEMEIN",NICK JR.ᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411375.ts
+#EXTINF:0 CUID="15120" tvg-name="HR" tvg-ID="don.hr.de" tvg-logo="https://dontv.shop/png/DE/hr.png" group-title="DE - UNTERHALTUNG",HRᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567593.ts
+#EXTINF:0 CUID="38115" tvg-name="TOGGO PLUS" tvg-ID="don.toggo_plus.de" tvg-logo="https://dontv.shop/png/DE/toggohd.png" group-title="DE - MagentaTV",TOGGO PLUSˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836041.ts
+#EXTINF:0 CUID="13769" tvg-name="FOLX TV" tvg-ID="don.folx_music_television.de" tvg-logo="https://dontv.shop/png/DE/folx.png" group-title="DE - ALLGEMEIN",FOLX TVᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447903.ts
+#EXTINF:0 CUID="13758" tvg-name="NDR NIEDERSACHSEN" tvg-ID="don.ndr_fernsehen_niedersachsen.de" tvg-logo="https://dontv.shop/png/DE/ndr1nieders.png" group-title="DE - ALLGEMEIN",NDR NIEDERSACHSENˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411312.ts
+#EXTINF:0 CUID="30833" tvg-name="NICKELODEON" tvg-ID="don.nickelodeon_hd.rs" tvg-logo="https://dontv.shop/png/SRB/nickelodeon.png" group-title="SRB",NICKELODEONˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/881789.ts
 #EXTINF:0 CUID="13774" tvg-name="VOLKSMUSIK TV" tvg-ID="don.volksmusiktv.de" tvg-logo="https://dontv.shop/png/DE/vevoschlager.png" group-title="DE - ALLGEMEIN",VOLKSMUSIK TVᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447900.ts
-#EXTINF:0 CUID="38084" tvg-name="ONE" tvg-ID="don.one.de" tvg-logo="https://dontv.shop/png/DE/one.png" group-title="DE - MagentaTV",ONEᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836072.ts
-#EXTINF:0 CUID="38108" tvg-name="SUPER RTL" tvg-ID="don.super_rtl.de" tvg-logo="https://dontv.shop/png/DE/superrtlhd.png" group-title="DE - MagentaTV",SUPER RTLᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836048.ts
+#EXTINF:0 CUID="30845" tvg-name="CARTOON NETWORK" tvg-ID="don.cartoon_network_hd_sr.rs" tvg-logo="http://dontv.shop/png/SRB/cartoonnetworkrs.png" group-title="SRB",CARTOON NETWORKˢᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/110897.ts
+#EXTINF:0 CUID="15072" tvg-name="WDR DORTMUND" tvg-ID="don.wdr.de" tvg-logo="https://dontv.shop/png/DE/wdrdortmund.png" group-title="DE - UNTERHALTUNG",WDR DORTMUNDᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567640.ts
+#EXTINF:0 CUID="13759" tvg-name="NDR MECKLENBURG-VORPOMMERN" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrmecklenburgvorpommern.png" group-title="DE - ALLGEMEIN",NDR MECKLENBURG-VORPOMMERNᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411313.ts
 #EXTINF:0 CUID="15065" tvg-name="SR" tvg-ID="don.swrsr.de" tvg-logo="http://103.176.90.92/picons/1567647.png" group-title="DE - UNTERHALTUNG",SRᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1567647.ts
 #EXTINF:0 CUID="13767" tvg-name="BON GUSTO" tvg-ID="don.bongusto.de" tvg-logo="https://dontv.shop/png/DE/bongusto.png" group-title="DE - ALLGEMEIN",BON GUSTOᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411467.ts
-#EXTINF:0 CUID="13784" tvg-name="BOOMERANG" tvg-ID="don.boomerang.de" tvg-logo="https://dontv.shop/png/DE/boomeranghd.png" group-title="DE - ALLGEMEIN",BOOMERANGᶠᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411378.ts
 #EXTINF:0 CUID="13771" tvg-name="JUKEBOX" tvg-ID="don.jukebox.de" tvg-logo="https://dontv.shop/png/DE/jukeboxhd.png" group-title="DE - ALLGEMEIN",JUKEBOXᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/969621.ts
 #EXTINF:0 CUID="38068" tvg-name="MTV" tvg-ID="don.mtv.de" tvg-logo="https://dontv.shop/png/DE/mtvhd.png" group-title="DE - MagentaTV",MTVᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836088.ts
-#EXTINF:0 CUID="38056" tvg-name="KIKA" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - MagentaTV",KIKAᴴᴰN/A FPS
+#EXTINF:0 CUID="38056" tvg-name="KIKA" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - MagentaTV",KIKAᶠᴴᴰN/A FPS
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836100.ts
-#EXTINF:0 CUID="13759" tvg-name="NDR MECKLENBURG-VORPOMMERN" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrmecklenburgvorpommern.png" group-title="DE - ALLGEMEIN",NDR MECKLENBURG-VORPOMMERNᴴᴰN/A FPS
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411313.ts
+#EXTINF:0 CUID="38108" tvg-name="SUPER RTL" tvg-ID="don.super_rtl.de" tvg-logo="https://dontv.shop/png/DE/superrtlhd.png" group-title="DE - MagentaTV",SUPER RTLᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836048.ts
+#EXTINF:0 CUID="38084" tvg-name="ONE" tvg-ID="don.one.de" tvg-logo="https://dontv.shop/png/DE/one.png" group-title="DE - MagentaTV",ONEᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836072.ts
+#EXTINF:0 CUID="13784" tvg-name="BOOMERANG" tvg-ID="don.boomerang.de" tvg-logo="https://dontv.shop/png/DE/boomeranghd.png" group-title="DE - ALLGEMEIN",BOOMERANGᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411378.ts
+#EXTINF:0 CUID="13781" tvg-name="DISNEY CHANNEL" tvg-ID="don.disney_channel.de" tvg-logo="https://dontv.shop/png/DE/disneyhd.png" group-title="Backup",DISNEY CHANNELᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411531.ts
+#EXTINF:0 CUID="38056" tvg-name="KIKA" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - MagentaTV",KIKAᶠᴴᴰN/A FPS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1836100.ts
