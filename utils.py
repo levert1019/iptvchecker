@@ -17,16 +17,13 @@ def sup_digits(text: str) -> str:
     return text.translate(tbl)
 
 def format_fps(text: str) -> str:
-    """ If it's purely numeric, convert to superscript; otherwise append ' FPS'."""
     m = re.search(r"(\d+(?:\.\d+)?)", text or "")
-    if m:
-        num = m.group(1)
-        if num.endswith(".0"):
-            num = num[:-2]
-        return f"{sup_digits(num)}ᶠᵖˢ"
-    # not numeric: keep the original text plus " FPS"
-    return f"{text} FPS"
-
+    if not m:
+        return ''
+    num = m.group(1)
+    if num.endswith(".0"):
+        num = num[:-2]
+    return f"{sup_digits(num)}ᶠᵖˢ"
 
 def resolution_to_label(res: str) -> str:
     """Map a resolution string 'WIDTH×HEIGHT' to a quality label."""
@@ -47,14 +44,16 @@ def resolution_to_label(res: str) -> str:
         key = 'sd'
     return QUALITY_LABELS[key]
 
+_SUP_CHARS = set(''.join(QUALITY_LABELS.values()) + 'ᶠᵖˢ' + ''.join('⁰¹²³⁴⁵⁶⁷⁸⁹×'))
+_SUP_PATTERN = re.compile(f"[{''.join(_SUP_CHARS)}]")
+
 def clean_name(name: str) -> str:
-    """Remove existing quality/fps tokens from the channel name."""
-    # Remove superscript fps
-    name = re.sub(r"\d+ᶠᵖˢ", '', name)
-    # Remove existing quality labels
-    for v in QUALITY_LABELS.values():
-        name = name.replace(v, '')
-    # Remove text tokens
-    name = re.sub(r"\b(sd|hd|fhd|uhd)\b", '', name, flags=re.IGNORECASE)
-    name = re.sub(r"\b\d+(?:\.\d+)?fps\b", '', name, flags=re.IGNORECASE)
+    """Strip all superscript quality/fps/resolution characters and collapse whitespace."""
+    # 1) remove entire multi-char quality labels (just in case)
+    for label in QUALITY_LABELS.values():
+        name = name.replace(label, '')
+    # 2) strip any remaining superscript chars (digits, x, letters, fps marker)
+    name = _SUP_PATTERN.sub('', name)
+    # 3) collapse multiple spaces
+    name = re.sub(r'\s+', ' ', name)
     return name.strip()
