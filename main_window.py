@@ -246,10 +246,13 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _start_writing(self):
         threading.Thread(target=self._write_output_files, daemon=True).start()
 
-    def _write_output_files(self):
+        def _write_output_files(self):
+        if not self.m3u_file:
+            return
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         paths = []
-        # Gather tested UIDs and display names
+
+        # Gather tested UIDs and their display labels
         tested, disp_map = set(), {}
         for tbl in (self.tbl_working, self.tbl_black_screen, self.tbl_non_working):
             for r in range(tbl.rowCount()):
@@ -259,36 +262,40 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
         def write(fn, uids):
             with open(fn, 'w', encoding='utf-8') as f:
-                f.write('#EXTM3U
-')
+                f.write("#EXTM3U\n")
                 for uid in uids:
                     ent = self.entry_map[uid]
                     extinf, url = ent['extinf'], ent['url']
                     if uid in tested:
+                        # update tvg-name attribute
                         extinf = extinf_tvg_re.sub(
-                            lambda m: f'{m.group(1)}{disp_map[uid]}{m.group(2)}',
+                            lambda m: f"{m.group(1)}{disp_map[uid]}{m.group(2)}",
                             extinf
                         )
+                        # update trailing channel name after comma
                         extinf = extinf_comma_re.sub(
-                            lambda m: f'{m.group(1)}{disp_map[uid]}',
+                            lambda m: f"{m.group(1)}{disp_map[uid]}",
                             extinf
                         )
-                    f.write(extinf + '
-')
-                    f.write(url + '
-')
+                    f.write(extinf + '\n')
+
+                    f.write(url + '\n')
             paths.append(fn)
 
-        # Write working
-        w_uids = [self.tbl_working.item(r, 0).data(QtCore.Qt.UserRole) for r in range(self.tbl_working.rowCount())]
-        write(os.path.join(self.output_dir, f"{base}_working.m3u"), w_uids)
-        # Split extras
+        # working
+        w = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole)
+             for r in range(self.tbl_working.rowCount())]
+        write(os.path.join(self.output_dir, f"{base}_working.m3u"), w)
+
         if self.split:
-            b_uids = [self.tbl_black_screen.item(r, 0).data(QtCore.Qt.UserRole) for r in range(self.tbl_black_screen.rowCount())]
-            write(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), b_uids)
-            n_uids = [self.tbl_non_working.item(r, 0).data(QtCore.Qt.UserRole) for r in range(self.tbl_non_working.rowCount())]
-            write(os.path.join(self.output_dir, f"{base}_notworking.m3u"), n_uids)
-        # All channels
+            b = [self.tbl_black_screen.item(r,0).data(QtCore.Qt.UserRole)
+                 for r in range(self.tbl_black_screen.rowCount())]
+            write(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), b)
+
+            n = [self.tbl_non_working.item(r,0).data(QtCore.Qt.UserRole)
+                 for r in range(self.tbl_non_working.rowCount())]
+            write(os.path.join(self.output_dir, f"{base}_notworking.m3u"), n)
+
         if self.include_untested:
             all_uids = list(self.entry_map.keys())
             write(os.path.join(self.output_dir, f"{base}_all.m3u"), all_uids)
@@ -296,7 +303,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.written = paths
         QtCore.QTimer.singleShot(0, self._on_files_written)
 
-    def _on_files_written(self):
+    def _on_files_written(self):(self):
         for p in self.written:
             self._on_log('info', f"Wrote output file: {p}")
         self._on_log('info', 'All tasks complete')
