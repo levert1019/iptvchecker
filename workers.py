@@ -10,12 +10,12 @@ class WorkerThread(QtCore.QThread):
     Worker thread for checking streams.
 
     Emits:
-    - result(name, status, resolution, fps)
+    - result(entry, status, resolution, fps)
     - log(level, message)
 
     Levels: 'working', 'info', 'error'
     """
-    result = QtCore.pyqtSignal(object, str, str, str)  # now emits entry dict, status, res, fps
+    result = QtCore.pyqtSignal(object, str, str, str)
     log = QtCore.pyqtSignal(str, str)
 
     def __init__(self, tasks: queue.Queue, retries: int, timeout: float, parent=None):
@@ -30,6 +30,7 @@ class WorkerThread(QtCore.QThread):
         # Process tasks until none remain or stopped
         while not self._stop.is_set():
             try:
+                # Each task is the full entry dict
                 entry = self.tasks.get_nowait()
                 name = entry['name']
                 url = entry['url']
@@ -40,6 +41,7 @@ class WorkerThread(QtCore.QThread):
             while self._pause.is_set() and not self._stop.is_set():
                 self.msleep(100)
 
+            # Retry loop
             for attempt in range(1, self.retries + 1):
                 self.log.emit('info', f"Testing {name} (try {attempt})")
                 st, res, bitrate, fps = check_stream(name, url, timeout=self.timeout)
@@ -56,7 +58,11 @@ class WorkerThread(QtCore.QThread):
                     break
 
                 else:
-                    self.log.emit('error', f"Channel: {name} is DOWN; retrying…")
+                    if attempt < self.retries:
+                        self.log.emit('error', f"Channel: {name} is DOWN; retrying…")
+                    else:
+                        self.log.emit('error', f"Channel: {name} is DOWN after {self.retries} retries")
+                        self.result.emit(entry, 'DOWN', '–', '–')
 
     def pause(self):
         self._pause.set()

@@ -1,41 +1,58 @@
 import subprocess
+import time
 from typing import Tuple
-
+from urllib.request import urlopen
 
 def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, str, str]:
     """
-    1) Detect full-black streams using ffmpeg blackdetect over 2s
-    2) Probe resolution, bitrate, and FPS using ffprobe r_frame_rate
+    1) Test basic connectivity via HTTP
+    2) Detect full-black streams with ffmpeg over 2s
+    3) Probe resolution, bitrate, and FPS with ffprobe
 
-    Returns:
-      status: 'UP', 'BLACK_SCREEN', or 'DOWN'
-      resolution: 'WIDTH×HEIGHT' or '–'
-      bitrate: raw bitrate (kbps) or '–'
-      fps: numeric fps string or '–'
+    Uses per-channel timeout: if a channel is DOWN, waits remaining timeout;
+    UP or BLACK_SCREEN returns immediately.
     """
-    # 1) Black screen detection
+    start = time.monotonic()
+
+    def _finish(status: str, res: str, br: str, fps: str) -> Tuple[str,str,str,str]:
+        # Only delay if channel is DOWN
+        if status == 'DOWN':
+            elapsed = time.monotonic() - start
+            if elapsed < timeout:
+                time.sleep(timeout - elapsed)
+        return status, res, br, fps
+
+    # 1) Connectivity check
     try:
-        black_cmd = [
-            'ffmpeg', '-hide_banner', '-v', 'error',
-            '-t', '2', '-i', url,
-            '-vf', 'blackdetect=d=2:pix_th=0.98',
-            '-an', '-f', 'null', '-'
-        ]
-        p = subprocess.run(
-            black_cmd,
+        resp = urlopen(url, timeout=timeout)
+        resp.close()
+    except Exception:
+        return _finish('DOWN', '–', '–', '–')
+
+    # 2) Black screen detection via ffmpeg
+    try:
+        proc = subprocess.run(
+            [
+                'ffmpeg', '-hide_banner', '-v', 'error',
+                '-t', '2', '-i', url,
+                '-vf', 'blackdetect=d=2:pix_th=0.98',
+                '-an', '-f', 'null', '-'
+            ],
             stderr=subprocess.PIPE,
             stdout=subprocess.DEVNULL,
             text=True,
             timeout=timeout
         )
-        if 'blackdetect' in (p.stderr or ''):
-            return 'BLACK_SCREEN', '–', '–', '–'
+        stderr = proc.stderr or ''
     except subprocess.TimeoutExpired:
-        return 'BLACK_SCREEN', '–', '–', '–'
+        return _finish('DOWN', '–', '–', '–')
     except Exception:
-        return 'DOWN', '–', '–', '–'
+        return _finish('DOWN', '–', '–', '–')
 
-    # 2) ffprobe for video stream info
+    if 'blackdetect' in stderr:
+        return 'BLACK_SCREEN', '–', '–', '–'
+
+    # 3) ffprobe info
     cmd = [
         'ffprobe', '-v', 'error',
         '-select_streams', 'v:0',
@@ -44,40 +61,32 @@ def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, 
         url
     ]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        lines = proc.stdout.strip().splitlines()
+        proc2 = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        lines = proc2.stdout.strip().splitlines()
     except subprocess.TimeoutExpired:
-        return 'DOWN', '–', '–', '–'
+        return _finish('DOWN', '–', '–', '–')
     except Exception:
-        return 'DOWN', '–', '–', '–'
+        return _finish('DOWN', '–', '–', '–')
 
-    # Expect at least 4 lines: width, height, r_frame_rate, bit_rate
     if len(lines) < 4:
-        return 'DOWN', '–', '–', '–'
+        return _finish('DOWN', '–', '–', '–')
 
     width_s, height_s, rfr, bitrate_s = lines[:4]
-    # resolution
-    if width_s.isdigit() and height_s.isdigit():
-        res = f"{width_s}×{height_s}"
-    else:
-        res = '–'
-    # bitrate (as-is)
-    br = bitrate_s if bitrate_s and bitrate_s.isdigit() else '–'
+    res = f"{width_s}×{height_s}" if width_s.isdigit() and height_s.isdigit() else '–'
+    br = bitrate_s if bitrate_s.isdigit() else '–'
 
-    # parse fps from r_frame_rate
-    fps = '–'
+    # parse FPS
+    fps_value = '–'
     if rfr:
-        if '/' in rfr:
-            num, den = rfr.split('/', 1)
-            try:
-                fps_val = float(num) / float(den)
-                fps = str(round(fps_val, 2))
-            except:
-                fps = '–'
-        else:
-            try:
-                fps = str(round(float(rfr), 2))
-            except:
-                fps = '–'
+        try:
+            if '/' in rfr:
+                num, den = rfr.split('/', 1)
+                fps_calc = float(num) / float(den)
+            else:
+                fps_calc = float(rfr)
+            fps_value = str(round(fps_calc, 2))
+        except:
+            fps_value = '–'
 
-    return 'UP', res, br, fps
+    # Successful streams return immediately
+    return 'UP', res, br, fps_value
