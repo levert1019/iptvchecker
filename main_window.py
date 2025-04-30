@@ -246,7 +246,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _start_writing(self):
         threading.Thread(target=self._write_output_files, daemon=True).start()
 
-        def _write_output_files(self):
+    def _write_output_files(self):
         if not self.m3u_file:
             return
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
@@ -278,7 +278,6 @@ class IPTVChecker(QtWidgets.QMainWindow):
                             extinf
                         )
                     f.write(extinf + '\n')
-
                     f.write(url + '\n')
             paths.append(fn)
 
@@ -303,7 +302,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.written = paths
         QtCore.QTimer.singleShot(0, self._on_files_written)
 
-    def _on_files_written(self):(self):
+    def _on_files_written(self):
         for p in self.written:
             self._on_log('info', f"Wrote output file: {p}")
         self._on_log('info', 'All tasks complete')
