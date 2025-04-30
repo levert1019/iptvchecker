@@ -15,7 +15,7 @@ class WorkerThread(QtCore.QThread):
 
     Levels: 'working', 'info', 'error'
     """
-    result = QtCore.pyqtSignal(str, str, str, str)
+    result = QtCore.pyqtSignal(object, str, str, str)  # now emits entry dict, status, res, fps
     log = QtCore.pyqtSignal(str, str)
 
     def __init__(self, tasks: queue.Queue, retries: int, timeout: float, parent=None):
@@ -30,7 +30,9 @@ class WorkerThread(QtCore.QThread):
         # Process tasks until none remain or stopped
         while not self._stop.is_set():
             try:
-                name, url = self.tasks.get_nowait()
+                entry = self.tasks.get_nowait()
+                name = entry['name']
+                url = entry['url']
             except queue.Empty:
                 break
 
@@ -45,12 +47,12 @@ class WorkerThread(QtCore.QThread):
                 if st == 'UP':
                     fps_value = fps or '–'
                     self.log.emit('working', f"Channel: {name} is WORKING [{res}, {fps_value} FPS]")
-                    self.result.emit(name, st, res, str(fps_value))
+                    self.result.emit(entry, st, res, fps_value)
                     break
 
                 elif st == 'BLACK_SCREEN':
                     self.log.emit('error', f"Channel: {name} has a BLACK SCREEN")
-                    self.result.emit(name, st, '–', '–')
+                    self.result.emit(entry, st, '–', '–')
                     break
 
                 else:

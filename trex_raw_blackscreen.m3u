@@ -1,5 +1,3 @@
 #EXTM3U
 #EXTINF:0 CUID="13752" tvg-name="### REGIONALSENDER ###" tvg-ID="dummy-13752" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### REGIONALSENDER ###
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411318.ts
-#EXTINF:0 CUID="13753" tvg-name="WDR Köln" tvg-ID="don.wdr_fernsehen_koln.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/wdr+.png" group-title="DE - ALLGEMEIN",WDR Köln
-http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411296.ts

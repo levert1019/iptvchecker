@@ -1,0 +1,185 @@
+#EXTM3U
+#EXTINF:0 CUID="38465" tvg-chno="null" tvg-name="### ALLGEMEIN ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### ALLGEMEIN ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ
+http://dontv.shop/player/img/logo3.png
+#EXTINF:0 CUID="13688" tvg-name="RTL 4K  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.rtl.de" tvg-logo="https://dontv.shop/png/DE/rtlhd.png" group-title="DE - ALLGEMEIN",RTL 4K  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411632.ts
+#EXTINF:0 CUID="13707" tvg-name="PROSIEBEN FUN  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.prosieben_fun.de" tvg-logo="https://dontv.shop/png/DE/pro7fun.png" group-title="DE - ALLGEMEIN",PROSIEBEN FUN  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411622.ts
+#EXTINF:0 CUID="13709" tvg-name="HEIMATKANAL  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.heimatkanal.de" tvg-logo="https://dontv.shop/png/DE/heimatkanal.png" group-title="DE - ALLGEMEIN",HEIMATKANAL  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411711.ts
+#EXTINF:0 CUID="13687" tvg-name="ZDF  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.zdf.de" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - ALLGEMEIN",ZDF  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/557314.ts
+#EXTINF:0 CUID="13714" tvg-name="SAT.1 EMOTIONS  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sat1_emotions.de" tvg-logo="https://dontv.shop/png/DE/sat1emotions.png" group-title="DE - ALLGEMEIN",SAT.1 EMOTIONS  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411322.ts
+#EXTINF:0 CUID="13696" tvg-name="RTL NITRO ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.nitro.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/rtlnitrohd.png" group-title="DE - ALLGEMEIN",RTL NITRO ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411445.ts
+#EXTINF:0 CUID="13701" tvg-name="RTL LIVING  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.rtl_living.de" tvg-logo="https://dontv.shop/png/DE/rtlliving.png" group-title="DE - ALLGEMEIN",RTL LIVING  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411626.ts
+#EXTINF:0 CUID="13697" tvg-name="RTL NITRO  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlnitro.png" group-title="DE - ALLGEMEIN",RTL NITRO  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411610.ts
+#EXTINF:0 CUID="13691" tvg-name="RTL  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.rtl.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/rtl.png" group-title="DE - ALLGEMEIN",RTL  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411453.ts
+#EXTINF:0 CUID="13704" tvg-name="PRO7SAT.1  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="dummy.epg" tvg-logo="https://dontv.shop/png/DE/pro7sat1.png" group-title="DE - ALLGEMEIN",PRO7SAT.1  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/692605.ts
+#EXTINF:0 CUID="13698" tvg-name="RTL CRIME  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.rtl_crime.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/rtlcrime.png" group-title="DE - ALLGEMEIN",RTL CRIME  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411324.ts
+#EXTINF:0 CUID="13703" tvg-name="PROSIEBEN ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBEN ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411624.ts
+#EXTINF:0 CUID="13710" tvg-name="SAT.1 ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sat1.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/sat1hd.png" group-title="DE - ALLGEMEIN",SAT.1 ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411450.ts
+#EXTINF:0 CUID="13715" tvg-name="KABEL EINS ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.kabel_eins.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/kabeleinshd.png" group-title="DE - ALLGEMEIN",KABEL EINS ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411447.ts
+#EXTINF:0 CUID="13712" tvg-name="SAT.1 GOLD ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sat1_gold.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/sat1goldhd.png" group-title="DE - ALLGEMEIN",SAT.1 GOLD ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411449.ts
+#EXTINF:0 CUID="13720" tvg-name="VOXUP  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxup.png" group-title="DE - ALLGEMEIN",VOXUP  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411325.ts
+#EXTINF:0 CUID="13717" tvg-name="KABEL EINS CLASSICS ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.kabel_eins_classics.de" tvg-logo="https://dontv.shop/png/DE/kabeleinsclassichd.png" group-title="DE - ALLGEMEIN",KABEL EINS CLASSICS ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411785.ts
+#EXTINF:0 CUID="13693" tvg-name="RTLZWEI  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.prosieben.de" catchup-type="xc" catchup-days="2" tvg-logo="https://dontv.shop/png/DE/rtl2.png" group-title="DE - ALLGEMEIN",RTLZWEI  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411448.ts
+#EXTINF:0 CUID="38464" tvg-chno="null" tvg-name="### DOKUS UND NEWS ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### DOKUS UND NEWS ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ
+http://dontv.shop/player/img/logo3.png
+#EXTINF:0 CUID="13692" tvg-name="RTL UP ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.rtlup.de" tvg-logo="https://dontv.shop/png/DE/rtlup.png" group-title="DE - ALLGEMEIN",RTL UP ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/833392.ts
+#EXTINF:0 CUID="13694" tvg-name="RTLZWEI  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.prosieben.de" tvg-logo="https://dontv.shop/png/DE/rtl2hd.png" group-title="DE - ALLGEMEIN",RTLZWEI  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411629.ts
+#EXTINF:0 CUID="13702" tvg-name="PROSIEBEN ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.prosieben.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/pro7hd.png" group-title="DE - ALLGEMEIN",PROSIEBEN ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411452.ts
+#EXTINF:0 CUID="13686" tvg-name="ZDF  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.zdf.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/zdfhd.png" group-title="DE - ALLGEMEIN",ZDF  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411459.ts
+#EXTINF:0 CUID="13732" tvg-name="QVC ZWEI  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.qvc2.de" tvg-logo="https://dontv.shop/png/DE/qvc2.png" group-title="DE - ALLGEMEIN",QVC ZWEI  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540016.ts
+#EXTINF:0 CUID="13722" tvg-name="TELE 5  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.tele_5.de" tvg-logo="https://dontv.shop/png/DE/tele5hd.png" group-title="DE - ALLGEMEIN",TELE 5  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411608.ts
+#EXTINF:0 CUID="13689" tvg-name="RTL PLUS ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.rtl_plus.de" tvg-logo="https://dontv.shop/png/DE/rtlplushd.png" group-title="DE - ALLGEMEIN",RTL PLUS ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1828542.ts
+#EXTINF:0 CUID="13718" tvg-name="VOX  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.vox.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/voxhd.png" group-title="DE - ALLGEMEIN",VOX  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411446.ts
+#EXTINF:0 CUID="13708" tvg-name="ROMANCE TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.romance_tv.de" tvg-logo="https://dontv.shop/png/DE/romancetvhd.png" group-title="DE - ALLGEMEIN",ROMANCE TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411712.ts
+#EXTINF:0 CUID="13684" tvg-name="DAS ERSTE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.das_erste.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/daserstehd.png" group-title="DE - ALLGEMEIN",DAS ERSTE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411462.ts
+#EXTINF:0 CUID="13724" tvg-name="SIXX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.sixx.de" tvg-logo="https://dontv.shop/png/DE/sixxhd.png" group-title="DE - ALLGEMEIN",SIXX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411612.ts
+#EXTINF:0 CUID="13705" tvg-name="PROSIEBEN MAXX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.prosieben_maxx.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/pro7maxhd.png" group-title="DE - ALLGEMEIN",PROSIEBEN MAXX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411451.ts
+#EXTINF:0 CUID="13727" tvg-name="ARD-ALPHA ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.ard_alpha.de" tvg-logo="https://dontv.shop/png/DE/ardalpha.png" group-title="DE - ALLGEMEIN",ARD-ALPHA ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1130275.ts
+#EXTINF:0 CUID="13725" tvg-name="3SAT  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.3sat.de" tvg-logo="https://dontv.shop/png/DE/3sathd.png" group-title="DE - ALLGEMEIN",3SAT  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411464.ts
+#EXTINF:0 CUID="13726" tvg-name="ARD  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.ard_das_erste.de" tvg-logo="https://dontv.shop/png/DE/ard.png" group-title="DE - ALLGEMEIN",ARD  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1028966.ts
+#EXTINF:0 CUID="13700" tvg-name="RTL PASSION  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.nitro.de" tvg-logo="https://dontv.shop/png/DE/rtlpassion.png" group-title="DE - ALLGEMEIN",RTL PASSION  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411627.ts
+#EXTINF:0 CUID="13723" tvg-name="SIXX ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.sixx.de" tvg-logo="https://dontv.shop/png/DE/sixxhd.png" group-title="DE - ALLGEMEIN",SIXX ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411444.ts
+#EXTINF:0 CUID="13721" tvg-name="VOXUP ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxuphd.png" group-title="DE - ALLGEMEIN",VOXUP ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/757228.ts
+#EXTINF:0 CUID="13734" tvg-name="A.TV ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.atv.de" tvg-logo="https://dontv.shop/png/DE/atv.png" group-title="DE - ALLGEMEIN",A.TV ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1120995.ts
+#EXTINF:0 CUID="13739" tvg-name="ZDF INFO  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.zdfinfo.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/zdfinfohd.png" group-title="DE - ALLGEMEIN",ZDF INFO  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411454.ts
+#EXTINF:0 CUID="13740" tvg-name="ZDFNEO  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.zdfneo.de" tvg-logo="https://dontv.shop/png/DE/zdfneohd.png" group-title="DE - ALLGEMEIN",ZDFNEO  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411456.ts
+#EXTINF:0 CUID="13737" tvg-name="BILD LIVE ᶠ ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="dummy.epg" tvg-logo="https://dontv.shop/png/DE/bild.png" group-title="DE - ALLGEMEIN",BILD LIVE ᶠ ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/707225.ts
+#EXTINF:0 CUID="13745" tvg-name="WELT  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welt.png" group-title="DE - ALLGEMEIN",WELT  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411328.ts
+#EXTINF:0 CUID="13743" tvg-name="CURIOSITY CHANNEL ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.curiosity_channel.de" tvg-logo="https://dontv.shop/png/DE/curiositychannel.png" group-title="DE - ALLGEMEIN",CURIOSITY CHANNEL ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411338.ts
+#EXTINF:0 CUID="13746" tvg-name="WELT  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.welt.de" tvg-logo="https://dontv.shop/png/DE/welthd.png" group-title="DE - ALLGEMEIN",WELT  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411470.ts
+#EXTINF:0 CUID="13744" tvg-name="WELT DER WUNDER TV  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.welt_der_wunder_tv.de" tvg-logo="https://dontv.shop/png/DE/weltderwunder.png" group-title="DE - ALLGEMEIN",WELT DER WUNDER TV  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411330.ts
+#EXTINF:0 CUID="13750" tvg-name="SKY DOCUMENTARIES  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sky_documentaries.de" tvg-logo="https://dontv.shop/png/DE/skydocumentaries.png" group-title="DE - ALLGEMEIN",SKY DOCUMENTARIES  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/718585.ts
+#EXTINF:0 CUID="13735" tvg-name="HAMBURG 1  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.hamburg_1.de" tvg-logo="https://dontv.shop/png/DE/hamburg1.png" group-title="DE - ALLGEMEIN",HAMBURG 1  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1004968.ts
+#EXTINF:0 CUID="13731" tvg-name="QVC  ⁵⁹.⁹⁴ᶠᵖˢ ᴴᴰ ⁵⁹.⁹⁴ᶠᵖˢ" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - ALLGEMEIN",QVC  ⁵⁹.⁹⁴ᶠᵖˢ ᴴᴰ ⁵⁹.⁹⁴ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1703624.ts
+#EXTINF:0 CUID="13736" tvg-name="HSE ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.hse.de" tvg-logo="https://dontv.shop/png/DE/hse.png" group-title="DE - ALLGEMEIN",HSE ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1271518.ts
+#EXTINF:0 CUID="13728" tvg-name="ARTE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.arte.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/artehd.png" group-title="DE - ALLGEMEIN",ARTE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411463.ts
+#EXTINF:0 CUID="13751" tvg-name="EURONEWS  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.euronews.de" tvg-logo="https://dontv.shop/png/DE/euronews.png" group-title="DE - ALLGEMEIN",EURONEWS  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/877864.ts
+#EXTINF:0 CUID="13747" tvg-name="N-TV  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.ntv.de" tvg-logo="https://dontv.shop/png/DE/ntvhd.png" group-title="DE - ALLGEMEIN",N-TV  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411327.ts
+#EXTINF:0 CUID="13742" tvg-name="PHOENIX  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.phoenix.de" tvg-logo="https://dontv.shop/png/DE/phoenixhd.png" group-title="DE - ALLGEMEIN",PHOENIX  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411331.ts
+#EXTINF:0 CUID="13760" tvg-name="NDR HAMBURG  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrhh.png" group-title="DE - ALLGEMEIN",NDR HAMBURG  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411314.ts
+#EXTINF:0 CUID="13730" tvg-name="QVC ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - ALLGEMEIN",QVC ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1703596.ts
+#EXTINF:0 CUID="13748" tvg-name="TAGESSCHAU 24  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.tagesschau_24.de" tvg-logo="https://dontv.shop/png/DE/tagesschauhd.png" group-title="DE - ALLGEMEIN",TAGESSCHAU 24  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411326.ts
+#EXTINF:0 CUID="13733" tvg-name="UHD1 BY ASTRA ᵁ ⁵⁰ᶠᵖˢ ᵁᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.uhd1.de" tvg-logo="https://dontv.shop/png/DE/uhd1.png" group-title="DE - ALLGEMEIN",UHD1 BY ASTRA ᵁ ⁵⁰ᶠᵖˢ ᵁᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540014.ts
+#EXTINF:0 CUID="13711" tvg-name="SAT.1  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sat1.de" tvg-logo="https://dontv.shop/png/DE/sat1.png" group-title="DE - ALLGEMEIN",SAT.1  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411619.ts
+#EXTINF:0 CUID="13765" tvg-name="HGTV  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.home_garden_tv.de" tvg-logo="https://dontv.shop/png/DE/hgtv.png" group-title="DE - ALLGEMEIN",HGTV  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411781.ts
+#EXTINF:0 CUID="38463" tvg-chno="null" tvg-name="### KINDERSENDER ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="dummy.epg" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### KINDERSENDER ### ᵁ ²⁵ᶠᵖˢ ᵁᴴᴰ ²⁵ᶠᵖˢ
+http://dontv.shop/player/img/logo3.png
+#EXTINF:0 CUID="13758" tvg-name="NDR NIEDERSACHSEN  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.ndr_fernsehen_niedersachsen.de" tvg-logo="https://dontv.shop/png/DE/ndr1nieders.png" group-title="DE - ALLGEMEIN",NDR NIEDERSACHSEN  ⁵⁰ᶠᵖˢ ˢᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411312.ts
+#EXTINF:0 CUID="13766" tvg-name="SERVUS TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="servustv.de" tvg-logo="https://dontv.shop/png/DE/servustvhd.png" group-title="DE - ALLGEMEIN",SERVUS TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411466.ts
+#EXTINF:0 CUID="13757" tvg-name="MDR THÜRINGEN  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.mdr.de" tvg-logo="https://dontv.shop/png/DE/mdrthuringen.png" group-title="DE - ALLGEMEIN",MDR THÜRINGEN  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411315.ts
+#EXTINF:0 CUID="13754" tvg-name="RBB  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.rbb.de" tvg-logo="https://dontv.shop/png/DE/rbb.png" group-title="DE - ALLGEMEIN",RBB  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411299.ts
+#EXTINF:0 CUID="13775" tvg-name="MELODIE TV  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.melodie_tv.de" tvg-logo="http://dontv.shop/png/DE/melodietv.png" group-title="DE - ALLGEMEIN",MELODIE TV  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447898.ts
+#EXTINF:0 CUID="13749" tvg-name="SKY NATURE ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.sky_nature.de" tvg-logo="https://dontv.shop/png/DE/skynature.png" group-title="DE - ALLGEMEIN",SKY NATURE ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/718584.ts
+#EXTINF:0 CUID="13778" tvg-name="K-TV  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.k_tv.de" tvg-logo="https://dontv.shop/png/DE/ktv.png" group-title="DE - ALLGEMEIN",K-TV  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1667978.ts
+#EXTINF:0 CUID="13761" tvg-name="WDR DORTMUND  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.wdr.de" tvg-logo="https://dontv.shop/png/DE/wdrdortmund.png" group-title="DE - ALLGEMEIN",WDR DORTMUND  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411307.ts
+#EXTINF:0 CUID="13755" tvg-name="BR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.br.de" tvg-logo="https://dontv.shop/png/DE/brhd.png" group-title="DE - ALLGEMEIN",BR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411317.ts
+#EXTINF:0 CUID="13756" tvg-name="HR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.hr.de" tvg-logo="https://dontv.shop/png/DE/hr.png" group-title="DE - ALLGEMEIN",HR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411316.ts
+#EXTINF:0 CUID="13729" tvg-name="QVC ᵁ ⁵⁰ᶠᵖˢ ᵁᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.qvc.de" tvg-logo="https://dontv.shop/png/DE/qvc.png" group-title="DE - ALLGEMEIN",QVC ᵁ ⁵⁰ᶠᵖˢ ᵁᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/540017.ts
+#EXTINF:0 CUID="13774" tvg-name="VOLKSMUSIK TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.volksmusiktv.de" tvg-logo="https://dontv.shop/png/DE/vevoschlager.png" group-title="DE - ALLGEMEIN",VOLKSMUSIK TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447900.ts
+#EXTINF:0 CUID="13780" tvg-name="DISNEY CHANNEL  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.disney_channel.de" tvg-logo="https://dontv.shop/png/DE/disneyhd.png" group-title="DE - ALLGEMEIN",DISNEY CHANNEL  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411377.ts
+#EXTINF:0 CUID="13772" tvg-name="DEUTSCHMUSIK FERNSEHEN ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="deutschesmusikfernsehen.de" tvg-logo="https://dontv.shop/png/DE/deutschesmusikfernsehen.png" group-title="DE - ALLGEMEIN",DEUTSCHMUSIK FERNSEHEN ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447902.ts
+#EXTINF:0 CUID="13770" tvg-name="DELUXE MUSIC ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.deluxe_music.de" tvg-logo="https://dontv.shop/png/DE/deluxmusichd.png" group-title="DE - ALLGEMEIN",DELUXE MUSIC ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411319.ts
+#EXTINF:0 CUID="13767" tvg-name="BON GUSTO ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.bongusto.de" tvg-logo="https://dontv.shop/png/DE/bongusto.png" group-title="DE - ALLGEMEIN",BON GUSTO ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411467.ts
+#EXTINF:0 CUID="13762" tvg-name="SR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.swrsr.de" tvg-logo="https://dontv.shop/png/DE/srhd.png" group-title="DE - ALLGEMEIN",SR  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411298.ts
+#EXTINF:0 CUID="13782" tvg-name="CARTOON NETWORK  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.cartoon_network.de" tvg-logo="https://dontv.shop/png/DE/cartoonnetwork.png" group-title="DE - ALLGEMEIN",CARTOON NETWORK  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411532.ts
+#EXTINF:0 CUID="13787" tvg-name="TOGGO PLUS  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="don.toggo_plus.de" tvg-logo="https://dontv.shop/png/DE/toggo.png" group-title="DE - ALLGEMEIN",TOGGO PLUS  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411370.ts
+#EXTINF:0 CUID="13764" tvg-name="ONE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.one.de" tvg-logo="https://dontv.shop/png/DE/one.png" group-title="DE - ALLGEMEIN",ONE  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411443.ts
+#EXTINF:0 CUID="13788" tvg-name="NICKELODEON  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ" tvg-ID="nickelodeon.de" tvg-logo="https://dontv.shop/png/DE/nickelodeon.png" group-title="DE - ALLGEMEIN",NICKELODEON  ²⁵ᶠᵖˢ ˢᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411373.ts
+#EXTINF:0 CUID="13776" tvg-name="MTV ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.mtv.de" tvg-logo="https://dontv.shop/png/DE/mtvhd.png" group-title="DE - ALLGEMEIN",MTV ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411606.ts
+#EXTINF:0 CUID="13771" tvg-name="JUKEBOX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.jukebox.de" tvg-logo="https://dontv.shop/png/DE/jukeboxhd.png" group-title="DE - ALLGEMEIN",JUKEBOX ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/969621.ts
+#EXTINF:0 CUID="13785" tvg-name="KIKA ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - ALLGEMEIN",KIKA ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411374.ts
+#EXTINF:0 CUID="13769" tvg-name="FOLX TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.folx_music_television.de" tvg-logo="https://dontv.shop/png/DE/folx.png" group-title="DE - ALLGEMEIN",FOLX TV ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/1447903.ts
+#EXTINF:0 CUID="13784" tvg-name="BOOMERANG ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.boomerang.de" tvg-logo="https://dontv.shop/png/DE/boomeranghd.png" group-title="DE - ALLGEMEIN",BOOMERANG ᶠ ⁵⁰ᶠᵖˢ ᶠᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411378.ts
+#EXTINF:0 CUID="13753" tvg-name="WDR Köln  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.wdr_fernsehen_koln.de" catchup-type="xc" catchup-days="3" tvg-logo="https://dontv.shop/png/DE/wdr+.png" group-title="DE - ALLGEMEIN",WDR Köln  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411296.ts
+#EXTINF:0 CUID="13783" tvg-name="SUPER RTL ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.super_rtl.de" tvg-logo="https://dontv.shop/png/DE/superrtlhd.png" group-title="DE - ALLGEMEIN",SUPER RTL ᶠ ²⁵ᶠᵖˢ ᶠᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411371.ts
+#EXTINF:0 CUID="13786" tvg-name="KIKA  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.kika.de" tvg-logo="https://dontv.shop/png/DE/kikahd.png" group-title="DE - ALLGEMEIN",KIKA  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411529.ts
+#EXTINF:0 CUID="13759" tvg-name="NDR MECKLENBURG-VORPOMMERN  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ" tvg-ID="don.ndr.de" tvg-logo="https://dontv.shop/png/DE/ndrmecklenburgvorpommern.png" group-title="DE - ALLGEMEIN",NDR MECKLENBURG-VORPOMMERN  ⁵⁰ᶠᵖˢ ᴴᴰ ⁵⁰ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411313.ts
+#EXTINF:0 CUID="13789" tvg-name="NICK JR.  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ" tvg-ID="don.nick_jr.de" tvg-logo="https://dontv.shop/png/DE/nickjr.png" group-title="DE - ALLGEMEIN",NICK JR.  ²⁵ᶠᵖˢ ᴴᴰ ²⁵ᶠᵖˢ
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411375.ts
