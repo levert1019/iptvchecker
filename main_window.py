@@ -161,30 +161,26 @@ class IPTVChecker(QtWidgets.QMainWindow):
             )
             return
 
-        # Clear previous results and logs
+        # Clear tables and logs
         for status in ("working", "black_screen", "non_working"):
             getattr(self, f"tbl_{status}").setRowCount(0)
         self.log_records.clear()
         self.te_console.clear()
         self.written.clear()
 
-        # Build entry_map
-        self.entry_map = {
-            e['name']: e
-            for grp in self.selected_groups
-            for e in self.group_urls.get(grp, [])
-        }
+        # Build entry map
+        self.entry_map = {e['name']: e for grp in self.selected_groups for e in self.group_urls.get(grp, [])}
 
-        # Log selected groups count
+        # Log selected count
         self._on_log('info', f"Selected {len(self.selected_groups)} groups")
 
-        # Prepare task queue
+        # Queue tasks
         self.tasks_q = queue.Queue()
         for grp in self.selected_groups:
             for entry in self.group_urls.get(grp, []):
                 self.tasks_q.put((entry['name'], entry['url']))
 
-        # Start worker threads
+        # Start workers
         self.threads = []
         for _ in range(self.workers):
             t = WorkerThread(self.tasks_q, self.retries, self.timeout)
@@ -198,7 +194,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.status.showMessage("Checking started", 3000)
 
     def _on_result(self, name, status, res, fps):
-        # Determine correct table
+        # Choose table
         if status == 'UP':
             key = 'working'
         elif status == 'BLACK_SCREEN':
@@ -211,25 +207,21 @@ class IPTVChecker(QtWidgets.QMainWindow):
         tbl.insertRow(row)
 
         # Build display name
-        display = clean_name(name)
+        disp = clean_name(name)
         if key == 'working':
             if self.update_quality:
-                display += resolution_to_label(res)
+                disp += resolution_to_label(res)
             if self.update_fps:
-                display += format_fps(fps)
+                disp += format_fps(fps)
 
-        item = QtWidgets.QTableWidgetItem(display)
+        item = QtWidgets.QTableWidgetItem(disp)
         item.setData(QtCore.Qt.UserRole, name)
         tbl.setItem(row, 0, item)
 
-        # Only 'working' table has Res and FPS columns
+        # Res/FPS only for working
         if key == 'working':
-            tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(
-                resolution_to_label(res) if self.update_quality else res
-            ))
-            tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(
-                format_fps(fps) if self.update_fps else fps
-            ))
+            tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res if not self.update_quality else resolution_to_label(res)))
+            tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(fps if not self.update_fps else format_fps(fps)))
 
     def _on_log(self, level, message):
         self.log_records.append((level, message))
@@ -237,11 +229,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
     def _refresh_console(self):
         self.te_console.clear()
-        show = {
-            'working': self.cb_show_working.isChecked(),
-            'info':    self.cb_show_info.isChecked(),
-            'error':   self.cb_show_error.isChecked()
-        }
+        show = {'working': self.cb_show_working.isChecked(), 'info': self.cb_show_info.isChecked(), 'error': self.cb_show_error.isChecked()}
         colors = {'working': '#00ff00', 'info': '#ffa500', 'error': '#ff0000'}
         for lvl, msg in self.log_records:
             if show.get(lvl, False):
@@ -250,10 +238,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _toggle_pause(self):
         self._is_paused = not self._is_paused
         for t in self.threads:
-            if self._is_paused:
-                t.pause()
-            else:
-                t.resume()
+            t.pause() if self._is_paused else t.resume()
         self.btn_pause.setText("Resume" if self._is_paused else "Pause")
         self.status.showMessage("Paused" if self._is_paused else "Resumed", 3000)
 
@@ -275,63 +260,52 @@ class IPTVChecker(QtWidgets.QMainWindow):
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         paths = []
 
-        # Collect tested names
+        # Gather tested display names
         tested = set()
+        display_map = {}
         for status in ('working', 'black_screen', 'non_working'):
             tbl = getattr(self, f"tbl_{status}")
-            for r in range(tbl.rowCount()):
-                tested.add(tbl.item(r,0).data(QtCore.Qt.UserRole))
+            for row in range(tbl.rowCount()):
+                item = tbl.item(row, 0)
+                orig = item.data(QtCore.Qt.UserRole)
+                tested.add(orig)
+                display_map[orig] = item.text()
 
-        def write_list(path, names, is_tested_only):
-            if is_tested_only and not self.include_untested:
-                return
+        def write_list(path, origs):
             with open(path, 'w', encoding='utf-8') as f:
                 f.write('#EXTM3U\n')
-                for orig in names:
+                for orig in origs:
                     entry = self.entry_map.get(orig)
                     if not entry:
                         continue
-                    # rebuild extinf
-                    raw = entry['extinf']
-                    prefix, _ = raw.split(',',1)
-                    display = clean_name(orig)
                     if orig in tested:
-                        if self.update_quality:
-                            display += resolution_to_label(entry.get('res',''))
-                        if self.update_fps:
-                            display += format_fps(entry.get('fps',0))
-                    new_inf = f"{prefix},{display}"
-                    f.write(new_inf+'\n')
-                    f.write(entry['url']+'\n')
+                        prefix = entry['extinf'].split(',', 1)[0]
+                        disp = display_map[orig]
+                        new_inf = f"{prefix},{disp}"
+                        f.write(new_inf + '\n')
+                        f.write(entry['url'] + '\n')
+                    else:
+                        f.write(entry['extinf'] + '\n')
+                        f.write(entry['url'] + '\n')
             paths.append(path)
 
-        # Write split files
         if self.split:
-            # working
-            names = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole)
-                     for r in range(self.tbl_working.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), names, True)
-            # black screen
-            names = [self.tbl_black_screen.item(r,0).data(QtCore.Qt.UserRole)
-                     for r in range(self.tbl_black_screen.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), names, True)
-            # non working
-            names = [self.tbl_non_working.item(r,0).data(QtCore.Qt.UserRole)
-                     for r in range(self.tbl_non_working.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_notworking.m3u"), names, True)
-            # all
+            w = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_working.rowCount())]
+            write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), w)
+            b = [self.tbl_black_screen.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_black_screen.rowCount())]
+            write_list(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), b)
+            n = [self.tbl_non_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_non_working.rowCount())]
+            write_list(os.path.join(self.output_dir, f"{base}_notworking.m3u"), n)
             if self.include_untested:
-                all_names = list(self.entry_map.keys())
-                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), all_names, False)
+                allc = list(self.entry_map.keys())
+                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), allc)
         else:
-            # single file
             if self.include_untested:
-                all_names = list(self.entry_map.keys())
-                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), all_names, False)
+                allc = list(self.entry_map.keys())
+                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), allc)
             else:
-                names = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole)
-                         for r in range(self.tbl_working.rowCount())]
-                write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), names, True)
+                w = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_working.rowCount())]
+                write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), w)
 
         self.written = paths
         QtCore.QTimer.singleShot(0, self._on_files_written)
