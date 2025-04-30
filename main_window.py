@@ -169,9 +169,8 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.written.clear()
 
         # Build entry map
-        self.entry_map = {e['name']: e for grp in self.selected_groups for e in self.group_urls.get(grp, [])}
-
-        # Log selected count
+        self.entry_map = {e['name']: e for entries in self.group_urls.values() for e in entries}
+           # Log selected count
         self._on_log('info', f"Selected {len(self.selected_groups)} groups")
 
         # Queue tasks
@@ -193,35 +192,50 @@ class IPTVChecker(QtWidgets.QMainWindow):
         threading.Thread(target=self._monitor_threads, daemon=True).start()
         self.status.showMessage("Checking started", 3000)
 
-    def _on_result(self, name, status, res, fps):
-        # Choose table
-        if status == 'UP':
-            key = 'working'
-        elif status == 'BLACK_SCREEN':
-            key = 'black_screen'
-        else:
-            key = 'non_working'
+def _on_result(self, name, status, res, fps):
+    # Determine which table to use
+    if status == 'UP':
+        key = 'working'
+    elif status == 'BLACK_SCREEN':
+        key = 'black_screen'
+    else:
+        key = 'non_working'
 
-        tbl = getattr(self, f"tbl_{key}")
-        row = tbl.rowCount()
-        tbl.insertRow(row)
+    tbl = getattr(self, f"tbl_{key}")
+    row = tbl.rowCount()
+    tbl.insertRow(row)
 
-        # Build display name
-        disp = clean_name(name)
-        if key == 'working':
-            if self.update_quality:
-                disp += resolution_to_label(res)
-            if self.update_fps:
-                disp += format_fps(fps)
+    # Base display name
+    display = clean_name(name)
 
-        item = QtWidgets.QTableWidgetItem(disp)
-        item.setData(QtCore.Qt.UserRole, name)
-        tbl.setItem(row, 0, item)
+    # Only for streams that came up successfully do we append quality/FPS
+    if status == 'UP':
+        if self.update_quality:
+            display += resolution_to_label(res)
+        if self.update_fps:
+            display += format_fps(fps)
 
-        # Res/FPS only for working
-        if key == 'working':
-            tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res if not self.update_quality else resolution_to_label(res)))
-            tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(fps if not self.update_fps else format_fps(fps)))
+    # Store original name in UserRole for later lookups
+    item = QtWidgets.QTableWidgetItem(display)
+    item.setData(QtCore.Qt.UserRole, name)
+    tbl.setItem(row, 0, item)
+
+    # Populate Res and FPS columns only in the working table
+    if key == 'working':
+        # Column 1: resolution (or raw res if not injecting)
+        tbl.setItem(
+            row, 1,
+            QtWidgets.QTableWidgetItem(
+                resolution_to_label(res) if self.update_quality else res
+            )
+        )
+        # Column 2: fps (or raw fps if not injecting)
+        tbl.setItem(
+            row, 2,
+            QtWidgets.QTableWidgetItem(
+                format_fps(fps) if self.update_fps else fps
+            )
+        )
 
     def _on_log(self, level, message):
         self.log_records.append((level, message))
@@ -254,13 +268,13 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _start_writing(self):
         threading.Thread(target=self._write_output_files, daemon=True).start()
 
-    def _write_output_files(self):
+        def _write_output_files(self):
         if not self.m3u_file:
             return
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         paths = []
 
-        # Gather tested display names
+        # First, gather which channels were actually tested and their display names
         tested = set()
         display_map = {}
         for status in ('working', 'black_screen', 'non_working'):
@@ -271,44 +285,68 @@ class IPTVChecker(QtWidgets.QMainWindow):
                 tested.add(orig)
                 display_map[orig] = item.text()
 
-        def write_list(path, origs):
+        def write_list(path, orig_list):
+            """Write an M3U given a list of original channel names."""
             with open(path, 'w', encoding='utf-8') as f:
                 f.write('#EXTM3U\n')
-                for orig in origs:
+                for orig in orig_list:
                     entry = self.entry_map.get(orig)
                     if not entry:
                         continue
                     if orig in tested:
+                        # Rebuild EXTINF with updated display name
                         prefix = entry['extinf'].split(',', 1)[0]
                         disp = display_map[orig]
-                        new_inf = f"{prefix},{disp}"
-                        f.write(new_inf + '\n')
-                        f.write(entry['url'] + '\n')
+                        f.write(f"{prefix},{disp}\n")
                     else:
-                        f.write(entry['extinf'] + '\n')
-                        f.write(entry['url'] + '\n')
+                        # Untested: write original EXTINF
+                        f.write(entry['extinf'] + "\n")
+                    f.write(entry['url'] + "\n")
             paths.append(path)
 
-        if self.split:
-            w = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_working.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), w)
-            b = [self.tbl_black_screen.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_black_screen.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_blackscreen.m3u"), b)
-            n = [self.tbl_non_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_non_working.rowCount())]
-            write_list(os.path.join(self.output_dir, f"{base}_notworking.m3u"), n)
-            if self.include_untested:
-                allc = list(self.entry_map.keys())
-                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), allc)
-        else:
-            if self.include_untested:
-                allc = list(self.entry_map.keys())
-                write_list(os.path.join(self.output_dir, f"{base}_all.m3u"), allc)
-            else:
-                w = [self.tbl_working.item(r,0).data(QtCore.Qt.UserRole) for r in range(self.tbl_working.rowCount())]
-                write_list(os.path.join(self.output_dir, f"{base}_working.m3u"), w)
+        # 1) Working channels
+        working_names = [
+            self.tbl_working.item(r, 0).data(QtCore.Qt.UserRole)
+            for r in range(self.tbl_working.rowCount())
+        ]
+        write_list(
+            os.path.join(self.output_dir, f"{base}_working.m3u"),
+            working_names
+        )
 
+        # 2) Black-screen channels (if splitting)
+        if self.split:
+            black_names = [
+                self.tbl_black_screen.item(r, 0).data(QtCore.Qt.UserRole)
+                for r in range(self.tbl_black_screen.rowCount())
+            ]
+            write_list(
+                os.path.join(self.output_dir, f"{base}_blackscreen.m3u"),
+                black_names
+            )
+
+            # 3) Non-working channels
+            nonw_names = [
+                self.tbl_non_working.item(r, 0).data(QtCore.Qt.UserRole)
+                for r in range(self.tbl_non_working.rowCount())
+            ]
+            write_list(
+                os.path.join(self.output_dir, f"{base}_notworking.m3u"),
+                nonw_names
+            )
+
+        # 4) All channels (if Include Untested is checked)
+        if self.include_untested:
+            all_names = list(self.entry_map.keys())
+            write_list(
+                os.path.join(self.output_dir, f"{base}_all.m3u"),
+                all_names
+            )
+
+        # Kick back to GUI thread to log completion
         self.written = paths
         QtCore.QTimer.singleShot(0, self._on_files_written)
+
 
     def _on_files_written(self):
         for p in self.written:
