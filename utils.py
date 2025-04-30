@@ -17,14 +17,16 @@ def sup_digits(text: str) -> str:
     return text.translate(tbl)
 
 def format_fps(text: str) -> str:
-    """Extract numeric fps, drop '/1' or trailing .0, convert to superscript + 'ᶠᵖˢ'."""
+    """ If it's purely numeric, convert to superscript; otherwise append ' FPS'."""
     m = re.search(r"(\d+(?:\.\d+)?)", text or "")
-    if not m:
-        return '–'
-    num = m.group(1)
-    if num.endswith('.0'):
-        num = num[:-2]
-    return f"{sup_digits(num)}ᶠᵖˢ"
+    if m:
+        num = m.group(1)
+        if num.endswith(".0"):
+            num = num[:-2]
+        return f"{sup_digits(num)}ᶠᵖˢ"
+    # not numeric: keep the original text plus " FPS"
+    return f"{text} FPS"
+
 
 def resolution_to_label(res: str) -> str:
     """Map a resolution string 'WIDTH×HEIGHT' to a quality label."""
