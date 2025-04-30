@@ -1,55 +1,45 @@
-# parser.py
 import re
-from collections import OrderedDict
 
-def parse_groups(path: str):
+def parse_groups(m3u_file: str):
     """
-    Parses an M3U, returning:
-      • group_entries: OrderedDict[
-            group_name → list of dict{extinf: str, name: str, url: str}
-        ]
-      • categories:    dict of Live/Movie/Series → list of group_names
+    Parse an M3U file into channel entries grouped by group-title.
+    Each entry dict has:
+      - 'uid': unique CUID or generated fallback
+      - 'extinf': full EXTINF line
+      - 'name': display name after the comma
+      - 'url': the stream URL
+    Returns (group_entries, categories).
     """
-    with open(path, encoding='utf-8', errors='ignore') as f:
-        lines = f.read().splitlines()
+    group_entries = {}
+    categories = {}
 
-    group_entries = OrderedDict()
-    # Pattern to capture full EXTINF line, channel name, and URL
-    extinf_re = re.compile(
-        r'(#EXTINF:[^,]*,(.*))$'
-    )
-    group_re  = re.compile(r'group-title="([^"]+)"', re.IGNORECASE)
+    with open(m3u_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
 
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        m = extinf_re.match(line)
-        if m and i+1 < len(lines):
-            raw_extinf = m.group(1)
-            name       = m.group(2).strip()
-            url        = lines[i+1].strip()
-            # extract group
-            gm = group_re.search(line)
-            grp = gm.group(1).strip() if gm else "Ungrouped"
-            entry = {'extinf': raw_extinf, 'name': name, 'url': url}
-            group_entries.setdefault(grp, []).append(entry)
-            i += 2
-        else:
-            i += 1
+    for idx, line in enumerate(lines):
+        if not line.strip().startswith('#EXTINF'):
+            continue
+        raw_extinf = line.strip()
+        url = lines[idx+1].strip() if idx+1 < len(lines) else ''
 
-    # Build categories
-    categories = {'Live': [], 'Movie': [], 'Series': []}
-    for grp, entries in group_entries.items():
-        urls = [e['url'].lower() for e in entries]
-        has_movie  = any('movie'  in u for u in urls)
-        has_series = any('series' in u for u in urls)
-        has_live   = any(not ('movie' in u or 'series' in u) for u in urls)
+        # Determine group-title
+        m_grp = re.search(r'group-title="([^"]*)"', raw_extinf)
+        grp = m_grp.group(1) if m_grp else ''
 
-        if has_movie and has_series:
-            entries.sort(key=lambda e: e['url'])
+        # Extract name after comma
+        parts = raw_extinf.split(',', 1)
+        name = parts[1] if len(parts) > 1 else ''
 
-        if has_movie:  categories['Movie'].append(grp)
-        if has_series: categories['Series'].append(grp)
-        if has_live:   categories['Live'].append(grp)
+        # Extract unique CUID if present
+        m_uid = re.search(r'CUID="([^"]+)"', raw_extinf)
+        uid = m_uid.group(1) if m_uid else f"{grp}:{name}:{idx}"
+
+        entry = {
+            'uid': uid,
+            'extinf': raw_extinf,
+            'name': name,
+            'url': url
+        }
+        group_entries.setdefault(grp, []).append(entry)
 
     return group_entries, categories
