@@ -1,6 +1,8 @@
 import os
 from PyQt5 import QtWidgets, QtCore
 from parser import parse_groups
+from dialogs import GroupSelectionDialog
+
 
 class OptionsDialog(QtWidgets.QDialog):
     """
