@@ -17,12 +17,20 @@ def sup_digits(text: str) -> str:
     return text.translate(tbl)
 
 def format_fps(text: str) -> str:
+    """
+    Round any numeric fps string to the nearest integer and superscript it.
+    E.g. "25.0" → ²⁵ᶠᵖˢ, "59.94" → ⁶⁰ᶠᵖˢ. Non-numeric text yields an empty string.
+    """
     m = re.search(r"(\d+(?:\.\d+)?)", text or "")
     if not m:
         return ''
     num = m.group(1)
-    if num.endswith(".0"):
-        num = num[:-2]
+    try:
+        rounded = int(round(float(num)))
+        num = str(rounded)
+    except Exception:
+        # fallback: drop any decimal part
+        num = num.split('.')[0]
     return f"{sup_digits(num)}ᶠᵖˢ"
 
 def resolution_to_label(res: str) -> str:

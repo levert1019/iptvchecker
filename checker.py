@@ -23,7 +23,7 @@ def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, 
     probe_cmd = [
         'ffprobe',
         '-v', 'error',
-        '-timeout', str(int(timeout * 1_000_000)),   # microseconds
+        '-timeout', str(int(timeout * 1_000_000)),  # microseconds
         '-select_streams', 'v:0',
         '-show_entries', 'stream=width,height,avg_frame_rate,bit_rate',
         '-of', 'default=noprint_wrappers=1:nokey=1',
@@ -50,9 +50,9 @@ def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, 
 
     width_s, height_s, rfr, bitrate_s = lines[:4]
     res = f"{width_s}×{height_s}" if width_s.isdigit() and height_s.isdigit() else '–'
-    br  = bitrate_s if bitrate_s.isdigit() else '–'
+    br = bitrate_s if bitrate_s.isdigit() else '–'
 
-    # parse FPS
+    # parse and round FPS to nearest integer
     fps_val = '–'
     try:
         if '/' in rfr:
@@ -60,12 +60,11 @@ def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, 
             fps_calc = float(num) / float(den)
         else:
             fps_calc = float(rfr)
-        fps_val = str(round(fps_calc, 2))
+        fps_val = str(int(round(fps_calc)))
     except Exception:
-        fps_val = '–'
+        fps_val = rfr or '–'
 
     # --- 2) Black-screen detection ---
-    # only if ffprobe succeeded, we do a quick 2s blackdetect
     try:
         ff_cmd = [
             'ffmpeg', '-hide_banner', '-v', 'error',
@@ -84,7 +83,6 @@ def check_stream(name: str, url: str, timeout: float = 10.0) -> Tuple[str, str, 
         if 'blackdetect' in stderr:
             return 'BLACK_SCREEN', '–', '–', '–'
     except subprocess.TimeoutExpired:
-        # treat timeout here as non-fatal (just skip blackdetect)
         pass
     except Exception:
         pass

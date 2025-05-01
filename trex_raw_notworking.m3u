@@ -1,3 +1,7 @@
 #EXTM3U
+#EXTINF:0 CUID="13714" tvg-name="SAT.1 EMOTIONS" tvg-ID="don.sat1_emotions.de" tvg-logo="https://dontv.shop/png/DE/sat1emotions.png" group-title="DE - ALLGEMEIN",SAT.1 EMOTIONS
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411322.ts
+#EXTINF:0 CUID="13720" tvg-name="VOXUP" tvg-ID="don.voxup.de" tvg-logo="https://dontv.shop/png/DE/voxup.png" group-title="DE - ALLGEMEIN",VOXUP
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411325.ts
 #EXTINF:0 CUID="13752" tvg-name="### REGIONALSENDER ###" tvg-ID="dummy-13752" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### REGIONALSENDER ###
 http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411318.ts
