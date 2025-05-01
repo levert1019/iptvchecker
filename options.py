@@ -13,33 +13,36 @@ class OptionsDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("Options")
         self.resize(900, 600)
-        self.group_urls = {}  # group-title -> list of entries
-        self.selected_groups = []
+
+        self.group_urls = {}        # populated after M3U load
+        self.selected_groups = []   # final user picks
+
         self._apply_dark_theme()
         self._init_ui()
 
     def _apply_dark_theme(self):
-        # Fusion dark style with custom widget styling
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
-        stylesheet = """
+        QtWidgets.QApplication.instance().setStyleSheet("""
             QDialog { background-color: #2b2b2b; }
             QLabel { color: #e0e0e0; }
-            QLineEdit, QSpinBox, QDoubleSpinBox { background-color: #3c3f41; color: #e0e0e0; border: 1px solid #555555; border-radius: 3px; padding: 2px; }
+            QLineEdit, QSpinBox, QDoubleSpinBox {
+                background-color: #3c3f41; color: #e0e0e0;
+                border: 1px solid #555555; border-radius: 3px; padding: 2px;
+            }
             QListWidget { background-color: #3c3f41; color: #e0e0e0; border: none; }
-            QPushButton { background-color: #5b2fc9; color: white; border-radius: 4px; padding: 6px 12px; }
+            QPushButton {
+                background-color: #5b2fc9; color: white;
+                border-radius: 4px; padding: 6px 12px;
+            }
             QPushButton:hover { background-color: #7d4ce7; }
             QCheckBox { color: #e0e0e0; spacing: 8px; }
-            QCheckBox::indicator { width: 16px; height: 16px; border: 1px solid #e0e0e0; background: white; }
-            QCheckBox::indicator:checked { background: #5b2fc9; }
-        """
-        QtWidgets.QApplication.instance().setStyleSheet(stylesheet)
+        """)
 
     def _init_ui(self):
         layout = QtWidgets.QVBoxLayout(self)
 
-        # --- Form: M3U file, workers, retries, timeout, output options ---
         form = QtWidgets.QFormLayout()
-        # M3U file picker
+        # M3U file
         self.le_m3u = QtWidgets.QLineEdit()
         btn_browse = QtWidgets.QPushButton("Browse M3U...")
         btn_browse.clicked.connect(self._browse_m3u)
@@ -48,27 +51,27 @@ class OptionsDialog(QtWidgets.QDialog):
         h_m3u.addWidget(btn_browse)
         form.addRow("M3U File:", h_m3u)
 
-        # Workers / Retries / Timeout
-        self.sp_workers = QtWidgets.QSpinBox(); self.sp_workers.setRange(1,50); self.sp_workers.setValue(5)
-        self.sp_retries = QtWidgets.QSpinBox(); self.sp_retries.setRange(0,10); self.sp_retries.setValue(2)
-        self.sp_timeout = QtWidgets.QSpinBox(); self.sp_timeout.setRange(1,60); self.sp_timeout.setValue(10)
+        # workers / retries / timeout
+        self.sp_workers = QtWidgets.QSpinBox();   self.sp_workers.setRange(1,50);  self.sp_workers.setValue(5)
+        self.sp_retries = QtWidgets.QSpinBox();   self.sp_retries.setRange(0,10);  self.sp_retries.setValue(2)
+        self.sp_timeout = QtWidgets.QSpinBox();   self.sp_timeout.setRange(1,60);  self.sp_timeout.setValue(10)
         form.addRow("Workers:", self.sp_workers)
         form.addRow("Retries:", self.sp_retries)
         form.addRow("Timeout (s):", self.sp_timeout)
 
-        # Flags
-        self.cb_split = QtWidgets.QCheckBox("Split into separate files")
-        self.cb_update_quality = QtWidgets.QCheckBox("Update Quality in Name")
-        self.cb_update_fps = QtWidgets.QCheckBox("Update FPS in Name")
+        # flags
+        self.cb_split            = QtWidgets.QCheckBox("Split into separate files")
+        self.cb_update_quality   = QtWidgets.QCheckBox("Update Quality in Name")
+        self.cb_update_fps       = QtWidgets.QCheckBox("Update FPS in Name")
         self.cb_include_untested = QtWidgets.QCheckBox("Include Untested Channels")
         form.addRow(self.cb_split)
         form.addRow(self.cb_update_quality)
         form.addRow(self.cb_update_fps)
         form.addRow(self.cb_include_untested)
 
-        # Output directory picker
+        # output directory
         self.le_out = QtWidgets.QLineEdit(os.getcwd())
-        btn_out = QtWidgets.QPushButton("Browse Output...")
+        btn_out   = QtWidgets.QPushButton("Browse Output...")
         btn_out.clicked.connect(self._browse_out)
         h_out = QtWidgets.QHBoxLayout()
         h_out.addWidget(self.le_out)
@@ -77,15 +80,16 @@ class OptionsDialog(QtWidgets.QDialog):
 
         layout.addLayout(form)
 
-        # --- Group selection ---
+        # Group selector
         self.btn_groups = QtWidgets.QPushButton("Select Groups...")
         self.btn_groups.setEnabled(False)
         self.btn_groups.clicked.connect(self._open_group_selector)
         layout.addWidget(self.btn_groups)
 
-        # --- Dialog buttons ---
-        btns = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        btns.accepted.connect(self._on_accept)
+        # OK / Cancel
+        btns = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok |
+                                           QtWidgets.QDialogButtonBox.Cancel)
+        btns.accepted.connect(self.accept)
         btns.rejected.connect(self.reject)
         layout.addWidget(btns)
 
@@ -93,34 +97,42 @@ class OptionsDialog(QtWidgets.QDialog):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Select M3U File", "", "M3U files (*.m3u *.m3u8);;All files (*)"
         )
-        if path:
-            self.le_m3u.setText(path)
-            self.group_urls, _ = parse_groups(path)
-            self.btn_groups.setEnabled(True)
+        if not path:
+            return
+
+        self.le_m3u.setText(path)
+        # parse_groups returns (group_urls, categories) but we only need URLs here
+        self.group_urls, _ = parse_groups(path)
+        self.btn_groups.setEnabled(True)
 
     def _open_group_selector(self):
-        # Independent classification; group can appear in multiple lists
+        # Build three independent lists:
         live, movies, series = [], [], []
         for grp, entries in self.group_urls.items():
-            lower_grp = grp.lower()
-            urls = [e['url'].lower() for e in entries]
-            is_movie = 'movie' in lower_grp or any('movie' in u for u in urls)
-            is_series = 'series' in lower_grp or any('series' in u for u in urls)
-            is_live = 'live' in lower_grp or any('live' in u for u in urls) or not (is_movie or is_series)
-            if is_live:
+            name_l = grp.lower()
+            urls_l = [e['url'].lower() for e in entries]
+
+            is_mov = 'movie' in name_l or any('movie' in u for u in urls_l)
+            is_ser = 'series' in name_l or any('series' in u for u in urls_l)
+            # if not flagged as movie/series, treat as live
+            is_liv = 'live' in name_l or any('live' in u for u in urls_l) or not (is_mov or is_ser)
+
+            if is_liv:
                 live.append(grp)
-            if is_movie:
+            if is_mov:
                 movies.append(grp)
-            if is_series:
+            if is_ser:
                 series.append(grp)
 
-        categories = {'Live': live, 'Movie': movies, 'Series': series}
-        dlg = GroupSelectionDialog(categories, self.group_urls, parent=self)
+        cats = {'Live': live, 'Movie': movies, 'Series': series}
+        dlg = GroupSelectionDialog(cats, self.group_urls, parent=self)
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
             self.selected_groups = dlg.selected_groups()
 
     def _browse_out(self):
-        path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Output Directory", self.le_out.text())
+        path = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "Select Output Directory", self.le_out.text()
+        )
         if path:
             self.le_out.setText(path)
 
