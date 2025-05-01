@@ -7,24 +7,23 @@ class OptionsDialog(QtWidgets.QDialog):
     def __init__(self, categories, group_entries, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Options")
-        self.resize(600, 400)
+        self.resize(800, 600)
 
-        # initial data
+        # Data
         self.categories = categories or {}
         self.group_entries = group_entries or {}
-        self.selected_groups = []
+        self.selected_groups = list(getattr(self, 'selected_groups', []))
 
-        # apply theme
+        # Apply theme
         self.setStyleSheet(STYLE_SHEET)
-
         self._build_ui()
 
     def _build_ui(self):
         main_v = QtWidgets.QVBoxLayout(self)
         main_v.setContentsMargins(10, 10, 10, 10)
-        main_v.setSpacing(15)
+        main_v.setSpacing(20)
 
-        # --- Main Options ---
+        # Main Options header
         lbl_main = QtWidgets.QLabel("<b>Main Options</b>")
         main_v.addWidget(lbl_main)
 
@@ -32,7 +31,7 @@ class OptionsDialog(QtWidgets.QDialog):
         v_main = QtWidgets.QGridLayout(grp_main)
         v_main.setColumnStretch(1, 1)
 
-        # M3U file picker
+        # M3U File
         v_main.addWidget(QtWidgets.QLabel("M3U File:"), 0, 0)
         self.le_m3u = QtWidgets.QLineEdit()
         btn_browse = QtWidgets.QPushButton("Browse...")
@@ -42,14 +41,14 @@ class OptionsDialog(QtWidgets.QDialog):
         h_m3u.addWidget(btn_browse)
         v_main.addLayout(h_m3u, 0, 1)
 
-        # Groups selector button
+        # Groups
         v_main.addWidget(QtWidgets.QLabel("Groups:"), 1, 0)
         self.btn_groups = QtWidgets.QPushButton("Select Groups...")
         self.btn_groups.setEnabled(bool(self.categories))
         self.btn_groups.clicked.connect(self._select_groups)
         v_main.addWidget(self.btn_groups, 1, 1)
 
-        # Output directory picker
+        # Output Directory
         v_main.addWidget(QtWidgets.QLabel("Output Directory:"), 2, 0)
         self.le_out = QtWidgets.QLineEdit()
         btn_out = QtWidgets.QPushButton("Browse...")
@@ -61,7 +60,7 @@ class OptionsDialog(QtWidgets.QDialog):
 
         main_v.addWidget(grp_main)
 
-        # --- IPTV Checker Settings ---
+        # IPTV Checker Settings header
         lbl_chk = QtWidgets.QLabel("<b>IPTV Checker Settings</b>")
         main_v.addWidget(lbl_chk)
 
@@ -110,29 +109,69 @@ class OptionsDialog(QtWidgets.QDialog):
             self, "Select M3U File", os.getcwd(), "M3U Files (*.m3u *.m3u8)")
         if path:
             self.le_m3u.setText(path)
-            # reload groups
+            # reload categories and entries
             self.group_entries, self.categories = parse_groups(path)
             self.btn_groups.setEnabled(True)
 
     def _select_groups(self):
         dlg = QtWidgets.QDialog(self)
         dlg.setWindowTitle("Select Groups")
-        dlg.resize(300, 400)
-        v = QtWidgets.QVBoxLayout(dlg)
-        listw = QtWidgets.QListWidget()
-        listw.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
-        for grp in sorted(self.categories.keys()):
-            item = QtWidgets.QListWidgetItem(grp)
-            listw.addItem(item)
-            if grp in self.selected_groups:
-                item.setSelected(True)
-        v.addWidget(listw)
-        box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        box.accepted.connect(dlg.accept)
-        box.rejected.connect(dlg.reject)
-        v.addWidget(box)
+        dlg.resize(900, 600)
+        v_main = QtWidgets.QVBoxLayout(dlg)
+        h = QtWidgets.QHBoxLayout()
+
+        # For each category, create a groupbox
+        list_widgets = {}
+        for cat, groups in self.categories.items():
+            grp_box = QtWidgets.QGroupBox(cat)
+            grp_box.setStyleSheet("QGroupBox { font-weight: bold; color: white; background-color: #5b2fc9; }")
+            v = QtWidgets.QVBoxLayout(grp_box)
+            # Select/Unselect All button
+            btn_all = QtWidgets.QPushButton("Select/Unselect All")
+            def make_toggle(lw):
+                def toggle():
+                    all_checked = all(lw.item(i).checkState() == QtCore.Qt.Checked for i in range(lw.count()))
+                    for i in range(lw.count()): lw.item(i).setCheckState(QtCore.Qt.Unchecked if all_checked else QtCore.Qt.Checked)
+                return toggle
+            lw = QtWidgets.QListWidget()
+            lw.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+            lw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+            def make_menu(lw):
+                def menu(pos):
+                    m = QtWidgets.QMenu()
+                    m.addAction("Check All", lambda: [lw.item(i).setCheckState(QtCore.Qt.Checked) for i in range(lw.count())])
+                    m.addAction("Uncheck All", lambda: [lw.item(i).setCheckState(QtCore.Qt.Unchecked) for i in range(lw.count())])
+                    m.addAction("Check Selected", lambda: [item.setCheckState(QtCore.Qt.Checked) for item in lw.selectedItems()])
+                    m.addAction("Uncheck Selected", lambda: [item.setCheckState(QtCore.Qt.Unchecked) for item in lw.selectedItems()])
+                    m.exec_(lw.mapToGlobal(pos))
+                return menu
+            btn_all.clicked.connect(make_toggle(lw))
+            lw.customContextMenuRequested.connect(make_menu(lw))
+            for g in sorted(groups):
+                item = QtWidgets.QListWidgetItem(g)
+                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                item.setCheckState(QtCore.Qt.Checked if g in self.selected_groups else QtCore.Qt.Unchecked)
+                lw.addItem(item)
+            v.addWidget(btn_all)
+            v.addWidget(lw)
+            h.addWidget(grp_box)
+            list_widgets[cat] = lw
+
+        v_main.addLayout(h)
+        # Ok/Cancel
+        btns = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        btns.accepted.connect(dlg.accept)
+        btns.rejected.connect(dlg.reject)
+        v_main.addWidget(btns)
+
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
-            self.selected_groups = [i.text() for i in listw.selectedItems()]
+            # collect checked
+            sel = []
+            for lw in list_widgets.values():
+                for i in range(lw.count()):
+                    if lw.item(i).checkState() == QtCore.Qt.Checked:
+                        sel.append(lw.item(i).text())
+            self.selected_groups = sel
 
     def _browse_out(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Output Directory", os.getcwd())
