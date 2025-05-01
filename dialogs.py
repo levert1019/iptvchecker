@@ -5,8 +5,9 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 class GroupSelectionDialog(QtWidgets.QDialog):
     """
     Dialog for selecting channel groups, showing Live, Movies, and Series
-    categories side by side with a dark theme, select/deselect-all
-    buttons, and properly styled checkboxes.
+    categories side by side with a dark theme, enhanced checkbox styling,
+    shift-click selection, and context menu options. The list fills the
+    full height of the dialog.
     """
     ACCENT = "#9b2cfc"
     BG = "#222222"
@@ -19,9 +20,15 @@ class GroupSelectionDialog(QtWidgets.QDialog):
         self.categories = categories
         self.group_urls = group_urls
         self.setWindowTitle("Select Groups")
-        self.resize(900, 500)
+        # Width fixed; height matches parent or nearly full screen
+        width = 900
+        if parent:
+            height = parent.height()
+        else:
+            height = QtWidgets.QApplication.primaryScreen().availableGeometry().height() - 100
+        self.resize(width, height)
 
-        # Fusion + dark theme + checkbox styling
+        # Fusion + dark palette
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor(self.BG))
@@ -34,16 +41,23 @@ class GroupSelectionDialog(QtWidgets.QDialog):
         palette.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(self.TEXT))
         QtWidgets.QApplication.instance().setPalette(palette)
 
-        # Additional stylesheet for list‐item checkboxes
-        self.setStyleSheet(f"""
-            QListView::indicator {{
-                width: 16px; height: 16px;
-                border: 1px solid {self.TEXT};
-                background: {self.TEXT};
+        # Style smaller fancy checkboxes with border
+        app = QtWidgets.QApplication.instance()
+        app.setStyleSheet(f"""
+            QListWidget::indicator {{
+                width: 12px; height: 12px;
+                border: 2px solid {self.TEXT};
+                border-radius: 3px;
+                background: {self.BG};
             }}
-            QListView::indicator:checked {{
-                background: {self.ACCENT};
+            QListWidget::indicator:checked {{ background: {self.ACCENT}; }}
+            QCheckBox::indicator {{
+                width: 12px; height: 12px;
+                border: 2px solid {self.TEXT};
+                border-radius: 3px;
+                background: {self.BG};
             }}
+            QCheckBox::indicator:checked {{ background: {self.ACCENT}; }}
         """)
 
         main_layout = QtWidgets.QVBoxLayout(self)
@@ -57,7 +71,7 @@ class GroupSelectionDialog(QtWidgets.QDialog):
         for key, title in display_order:
             panel = QtWidgets.QFrame()
             panel.setFrameShape(QtWidgets.QFrame.Box)
-            panel.setStyleSheet(f"QFrame {{ border: 2px solid {self.BORDER}; border-radius: 6px; }}")
+            panel.setStyleSheet(f"border: 2px solid {self.BORDER}; border-radius: 6px;")
             vbox = QtWidgets.QVBoxLayout(panel)
             vbox.setContentsMargins(0, 0, 0, 0)
 
@@ -66,8 +80,7 @@ class GroupSelectionDialog(QtWidgets.QDialog):
             header.setAlignment(QtCore.Qt.AlignCenter)
             header.setFixedHeight(30)
             header.setStyleSheet(
-                f"QLabel {{ background-color: {self.ACCENT}; color: {self.TEXT}; "
-                "font-weight: bold; padding: 4px; }}"
+                f"background-color: {self.ACCENT}; color: {self.TEXT}; font-weight: bold; padding: 4px;"
             )
             vbox.addWidget(header)
 
@@ -75,17 +88,18 @@ class GroupSelectionDialog(QtWidgets.QDialog):
             btn = QtWidgets.QPushButton("Select/Unselect All")
             btn.setFixedHeight(30)
             btn.setStyleSheet(
-                f"QPushButton {{ background-color: {self.ACCENT}; color: {self.TEXT}; "
-                "border: none; font-size: 12pt; }}"
+                f"background-color: {self.ACCENT}; color: {self.TEXT}; border: none; font-size: 12pt;"
             )
             btn.clicked.connect(lambda _, k=key: self._toggle_all(k))
             vbox.addWidget(btn)
 
-            # List widget
+            # List widget: fill remaining space
             lw = QtWidgets.QListWidget()
-            lw.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+            lw.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
             lw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
             lw.customContextMenuRequested.connect(self._context_menu)
+            lw.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
             for grp in self.categories.get(key, []):
                 count = len(self.group_urls.get(grp, []))
                 item = QtWidgets.QListWidgetItem(f"{grp} ({count})")
@@ -93,14 +107,15 @@ class GroupSelectionDialog(QtWidgets.QDialog):
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
                 item.setCheckState(QtCore.Qt.Unchecked)
                 lw.addItem(item)
-            vbox.addWidget(lw)
 
+            vbox.addWidget(lw, 1)
             setattr(self, f"{key.lower()}_lw", lw)
             cats_layout.addWidget(panel)
+            cats_layout.setStretch(cats_layout.count()-1, 1)
 
-        main_layout.addLayout(cats_layout)
-        main_layout.addStretch()
+        main_layout.addLayout(cats_layout, 1)
 
+        # OK/Cancel
         btns = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         btns.accepted.connect(self.accept)
         btns.rejected.connect(self.reject)
@@ -108,24 +123,30 @@ class GroupSelectionDialog(QtWidgets.QDialog):
 
     def _toggle_all(self, category):
         lw = getattr(self, f"{category.lower()}_lw")
-        # check if any unchecked → then check all, else uncheck all
-        target = QtCore.Qt.Checked if any(lw.item(i).checkState() == QtCore.Qt.Unchecked 
-                                          for i in range(lw.count())) else QtCore.Qt.Unchecked
+        target = QtCore.Qt.Checked if any(
+            lw.item(i).checkState() == QtCore.Qt.Unchecked
+            for i in range(lw.count())
+        ) else QtCore.Qt.Unchecked
         for i in range(lw.count()):
             lw.item(i).setCheckState(target)
 
     def _context_menu(self, pos):
         lw = self.sender()
         menu = QtWidgets.QMenu(lw)
-        act_all = menu.addAction("Select All")
-        act_none = menu.addAction("Deselect All")
+        act_all = menu.addAction("Check All")
+        act_none = menu.addAction("Uncheck All")
+        menu.addSeparator()
+        act_sel = menu.addAction("Check Selected Groups")
+        act_unsel = menu.addAction("Uncheck Selected Groups")
         action = menu.exec_(lw.mapToGlobal(pos))
         if action == act_all:
-            for i in range(lw.count()):
-                lw.item(i).setCheckState(QtCore.Qt.Checked)
+            for i in range(lw.count()): lw.item(i).setCheckState(QtCore.Qt.Checked)
         elif action == act_none:
-            for i in range(lw.count()):
-                lw.item(i).setCheckState(QtCore.Qt.Unchecked)
+            for i in range(lw.count()): lw.item(i).setCheckState(QtCore.Qt.Unchecked)
+        elif action == act_sel:
+            for item in lw.selectedItems(): item.setCheckState(QtCore.Qt.Checked)
+        elif action == act_unsel:
+            for item in lw.selectedItems(): item.setCheckState(QtCore.Qt.Unchecked)
 
     def selected_groups(self) -> list[str]:
         result = []
