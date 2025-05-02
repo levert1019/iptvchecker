@@ -1,10 +1,8 @@
 import sys
 import os
 import queue
-import threading
 import re
-
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from parser import parse_groups
 from workers import WorkerThread
@@ -15,6 +13,12 @@ from options import OptionsDialog
 # Regex to extract CUID from an EXTINF line
 CUID_RE = re.compile(r'CUID="([^\"]+)"')
 
+# Color mapping for console messages
+CONSOLE_COLORS = {
+    'working': 'green',
+    'info': 'blue',
+    'error': 'red'
+}
 
 class IPTVChecker(QtWidgets.QMainWindow):
     def __init__(self):
@@ -25,8 +29,8 @@ class IPTVChecker(QtWidgets.QMainWindow):
         # --- Core state ---
         self.m3u_file = ""
         self.original_lines = []
-        self.group_entries = {}   # group_title -> list of entry dicts
-        self.categories = {}      # same shape, for OptionsDialog
+        self.group_entries = {}
+        self.categories = {}
         self.selected_groups = []
 
         # --- Options defaults ---
@@ -40,9 +44,10 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.output_dir = os.getcwd()
 
         # --- Runtime ---
-        self.entry_map = {}       # uid -> entry dict
-        self.threads = []         # WorkerThread instances
-        self.log_records = []     # list of (level, msg)
+        self.entry_map = {}
+        self.threads = []
+        # log_records stores tuples: (level, msg, color)
+        self.log_records = []
         self._is_paused = False
         self._poll_timer = None
 
@@ -53,7 +58,6 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _build_ui(self):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
-
         main_v = QtWidgets.QVBoxLayout(central)
         main_v.setContentsMargins(10, 10, 10, 10)
         main_v.setSpacing(0)
@@ -65,33 +69,22 @@ class IPTVChecker(QtWidgets.QMainWindow):
         bar_layout = QtWidgets.QHBoxLayout(bar)
         bar_layout.setContentsMargins(10, 0, 0, 0)
 
-        # Button group for toggling pages
         btn_group = QtWidgets.QButtonGroup(self)
-
-        # IPTV Checker
         btn_iptv = QtWidgets.QPushButton("IPTV Checker")
         btn_iptv.setCheckable(True)
         btn_iptv.setChecked(True)
-        btn_iptv.setStyleSheet(
-            "color:white; background:transparent; font-weight:bold; border:none;"
-        )
+        btn_iptv.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
         btn_group.addButton(btn_iptv)
         bar_layout.addWidget(btn_iptv)
 
-        # Playlist Sorter (second)
         btn_playlist = QtWidgets.QPushButton("Playlist Sorter")
         btn_playlist.setCheckable(True)
-        btn_playlist.setStyleSheet(
-            "color:white; background:transparent; font-weight:bold; border:none;"
-        )
+        btn_playlist.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
         btn_group.addButton(btn_playlist)
         bar_layout.addWidget(btn_playlist)
 
-        # Options (last)
         btn_options = QtWidgets.QPushButton("Options")
-        btn_options.setStyleSheet(
-            "color:white; background:transparent; border:none;"
-        )
+        btn_options.setStyleSheet("color:white; background:transparent; border:none;")
         btn_options.clicked.connect(self._open_options)
         bar_layout.addWidget(btn_options)
 
@@ -102,25 +95,18 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.pages = QtWidgets.QStackedWidget()
         main_v.addWidget(self.pages)
 
-        # Page 0: IPTV Checker UI
+        # Page 0: IPTV Checker
         page0 = QtWidgets.QWidget()
         pv0 = QtWidgets.QVBoxLayout(page0)
         pv0.setContentsMargins(10, 10, 10, 10)
         pv0.setSpacing(20)
 
-        hdr0 = QtWidgets.QLabel(
-            '<span style="font-weight:bold; font-size:28pt;">Don</span>'
-            '<span style="font-weight:bold; font-size:28pt; color:#5b2fc9;">TV</span>'
-            '<span style="font-weight:bold; font-size:16pt;"> IPTV Checker</span>'
-        )
+        hdr0 = QtWidgets.QLabel("DonTV IPTV Checker")
         hdr0.setAlignment(QtCore.Qt.AlignCenter)
         pv0.addWidget(hdr0)
 
-        # Controls row
         ctrl_h = QtWidgets.QHBoxLayout()
-        for text, slot in [("Start", self.start_check),
-                           ("Pause", self._toggle_pause),
-                           ("Stop", self.stop_check)]:
+        for text, slot in [("Start", self.start_check), ("Pause", self._toggle_pause), ("Stop", self.stop_check)]:
             btn = QtWidgets.QPushButton(text)
             btn.setFixedSize(130, 45)
             btn.clicked.connect(slot)
@@ -131,8 +117,8 @@ class IPTVChecker(QtWidgets.QMainWindow):
         ctrl_h.addStretch()
         pv0.addLayout(ctrl_h)
 
-        # Result tables
         panes = QtWidgets.QHBoxLayout()
+        # Three panels: working (with Res, FPS columns), black screen, non working
         for status in ("working", "black_screen", "non_working"):
             grp = QtWidgets.QGroupBox(status.replace("_", " ").title())
             cols = 3 if status == "working" else 1
@@ -147,7 +133,6 @@ class IPTVChecker(QtWidgets.QMainWindow):
             panes.addWidget(grp)
         pv0.addLayout(panes)
 
-        # Console + filters
         console_grp = QtWidgets.QGroupBox("Console")
         console_v = QtWidgets.QVBoxLayout(console_grp)
         flt_h = QtWidgets.QHBoxLayout()
@@ -166,31 +151,22 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
         self.pages.addWidget(page0)
 
-        # Page 1: Playlist Sorter UI
+        # Page 1: Playlist Sorter
         page1 = QtWidgets.QWidget()
         pv1 = QtWidgets.QVBoxLayout(page1)
         pv1.setContentsMargins(10, 10, 10, 10)
         pv1.setSpacing(20)
-
-        hdr1 = QtWidgets.QLabel(
-            '<span style="font-weight:bold; font-size:28pt;">Don</span>'
-            '<span style="font-weight:bold; font-size:28pt; color:#5b2fc9;">TV</span>'
-            '<span style="font-weight:bold; font-size:16pt;"> Playlist Sorter</span>'
-        )
+        hdr1 = QtWidgets.QLabel("DonTV Playlist Sorter")
         hdr1.setAlignment(QtCore.Qt.AlignCenter)
         pv1.addWidget(hdr1)
-
         placeholder = QtWidgets.QLabel("Playlist Sorter functionality coming soon.")
         placeholder.setAlignment(QtCore.Qt.AlignCenter)
         pv1.addWidget(placeholder)
-
         self.pages.addWidget(page1)
 
-        # Connect switch buttons
         btn_iptv.clicked.connect(lambda: self.pages.setCurrentIndex(0))
         btn_playlist.clicked.connect(lambda: self.pages.setCurrentIndex(1))
 
-        # Status bar
         self.status = QtWidgets.QStatusBar()
         self.setStatusBar(self.status)
 
@@ -215,6 +191,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
             opts = dlg.get_options()
+            # apply options
             self.m3u_file = opts["m3u_file"]
             self.workers = opts["workers"]
             self.retries = opts["retries"]
@@ -225,35 +202,32 @@ class IPTVChecker(QtWidgets.QMainWindow):
             self.include_untested = opts["include_untested"]
             self.output_dir = opts["output_dir"]
             self.selected_groups = opts["selected_groups"]
+            # reapply style sheet so UI appearance stays consistent
+            self.setStyleSheet(STYLE_SHEET)
 
     def start_check(self):
         if not self.m3u_file or not self.selected_groups:
-            QtWidgets.QMessageBox.warning(
-                self, "Missing Settings",
-                "Please select an M3U file and at least one group."
-            )
+            QtWidgets.QMessageBox.warning(self, "Missing Settings", "Please select an M3U file and at least one group.")
             return
 
         with open(self.m3u_file, "r", encoding="utf-8") as f:
             self.original_lines = f.readlines()
 
         self.group_entries, self.categories = parse_groups(self.m3u_file)
-
         for s in ("working", "black_screen", "non_working"):
             getattr(self, f"tbl_{s}").setRowCount(0)
+
         self.log_records.clear()
         self.te_console.clear()
-
         self.entry_map = {e["uid"]: e for grp in self.group_entries.values() for e in grp}
+
         q = queue.Queue()
         for grp in self.selected_groups:
             for e in self.group_entries.get(grp, []):
                 q.put(e.copy())
         self.tasks_q = q
 
-        self.status.showMessage(
-            f"Queued {q.qsize()} tasks from {len(self.selected_groups)} groups", 3000
-        )
+        self.status.showMessage(f"Queued {q.qsize()} tasks from {len(self.selected_groups)} groups", 3000)
 
         self.threads = []
         for _ in range(self.workers):
@@ -276,39 +250,44 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
         display = clean_name(entry["name"])
         if status == "UP":
-            if self.update_quality:
-                q = resolution_to_label(res)
-                if q:
-                    display += " " + q
-            if self.update_fps:
-                f = format_fps(fps)
-                if f:
-                    display += " " + f
+            if self.update_quality and res:
+                display += " " + resolution_to_label(res)
+            if self.update_fps and fps is not None:
+                display += " " + format_fps(fps)
 
         item = QtWidgets.QTableWidgetItem(display)
         item.setData(QtCore.Qt.UserRole, entry["uid"])
         tbl.setItem(row, 0, item)
 
+        # show res and fps in separate columns for working channels
         if tbl is self.tbl_working:
-            tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res))
-            tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(str(fps)))
+            tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res or ""))
+            tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(str(fps) if fps is not None else ""))
 
     def _on_log(self, level, msg):
-        self.log_records.append((level, msg))
+        color = CONSOLE_COLORS.get(level, 'black')
+        self.log_records.append((level, msg, color))
         self._refresh_console()
 
     def _refresh_console(self):
         self.te_console.clear()
-        show = {"working": self.cb_show_working.isChecked(), "info": self.cb_show_info.isChecked(), "error": self.cb_show_error.isChecked()}
-        colors = {"working": "#00ff00", "info": "#ffa500", "error": "#ff0000"}
-        for lvl, m in self.log_records:
+        show = {
+            "working": self.cb_show_working.isChecked(),
+            "info": self.cb_show_info.isChecked(),
+            "error": self.cb_show_error.isChecked()
+        }
+        for lvl, m, color in self.log_records:
             if show.get(lvl, False):
-                self.te_console.append(f"<span style='color:{colors[lvl]}'>{m}</span>")
+                # append with HTML to preserve color
+                self.te_console.appendHtml(f'<span style="color:{color}">{m}</span>')
 
     def _toggle_pause(self):
         self._is_paused = not self._is_paused
         for t in self.threads:
-            t.pause() if self._is_paused else t.resume()
+            if self._is_paused:
+                t.pause()
+            else:
+                t.resume()
         self.btn_pause.setText("Resume" if self._is_paused else "Pause")
         self.status.showMessage("Paused" if self._is_paused else "Resumed", 3000)
 
@@ -320,7 +299,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
     def _monitor_threads(self):
         if all(not t.isRunning() for t in self.threads):
             self._poll_timer.stop()
-            threading.Thread(target=self._write_output_files, daemon=True).start()
+            QtCore.QTimer.singleShot(0, self._write_output_files)
 
     def _write_output_files(self):
         if not self.m3u_file:
@@ -328,62 +307,86 @@ class IPTVChecker(QtWidgets.QMainWindow):
 
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         outd = self.output_dir or os.getcwd()
+        header = "#EXTM3U\n"
 
         if self.split:
-            written = []
-            for grp in self.selected_groups:
-                filename = os.path.join(outd, f"{base}_{grp.replace(' ', '_')}.m3u")
-                with open(filename, "w", encoding="utf-8") as f:
-                    i = 0
-                    while i < len(self.original_lines):
-                        ln = self.original_lines[i]
+            status_info = [
+                ("working", "_working"),
+                ("black_screen", "_blackscreen"),
+                ("non_working", "_notworking"),
+            ]
+            # Create separate files
+            for status_key, suffix in status_info:
+                fn = os.path.join(outd, f"{base}{suffix}.m3u")
+                with open(fn, "w", encoding="utf-8") as f:
+                    f.write(header)
+                    tbl = getattr(self, f"tbl_{status_key}")
+                    for row in range(tbl.rowCount()):
+                        uid = tbl.item(row, 0).data(QtCore.Qt.UserRole)
+                        entry = self.entry_map.get(uid)
+                        if not entry:
+                            continue
+                        display = clean_name(entry["name"])
+                        if self.update_quality and entry.get("res"):
+                            display += " " + resolution_to_label(entry["res"])
+                        if self.update_fps and entry.get("fps"):
+                            display += " " + format_fps(entry["fps"])
+                        attrs = []
+                        for k in ("CUID", "tvg-name", "tvg-id", "tvg-logo", "group-title"):
+                            if k in entry:
+                                attrs.append(f'{k}="{entry[k]}"')
+                        extinf = "#EXTINF:0 " + " ".join(attrs) + "," + display + "\n"
+                        f.write(extinf)
+                        f.write(entry["url"] + "\n")
+                self.status.showMessage(f"Wrote {fn}", 5000)
+
+            # Include untested if requested
+            if self.include_untested:
+                fn = os.path.join(outd, f"{base}_all.m3u")
+                with open(fn, "w", encoding="utf-8") as f:
+                    f.write(header)
+                    for ln in self.original_lines:
                         if ln.startswith("#EXTINF") and (m := CUID_RE.search(ln)):
                             uid = m.group(1)
                             entry = self.entry_map.get(uid)
-                            if entry and entry.get("group-title") == grp:
-                                attrs = [
-                                    f'{k}="{entry[k]}"'
-                                    for k in ("CUID", "tvg-name", "tvg-id", "tvg-logo", "group-title")
-                                    if k in entry
-                                ]
-                                new_ext = "#EXTINF:0 " + " ".join(attrs) + "," + entry["name"] + "\n"
-                                f.write(new_ext)
-                                if i + 1 < len(self.original_lines):
-                                    f.write(self.original_lines[i + 1])
-                                i += 2
-                                continue
-                        f.write(ln)
-                        i += 1
-                written.append(filename)
-            self.status.showMessage(f"Wrote {len(written)} files to {outd}", 3000)
+                            if entry:
+                                display = clean_name(entry["name"])
+                                if self.update_quality and entry.get("res"):
+                                    display += " " + resolution_to_label(entry["res"])
+                                if self.update_fps and entry.get("fps"):
+                                    display += " " + format_fps(entry["fps"])
+                                attrs = []
+                                for k in ("CUID", "tvg-name", "tvg-id", "tvg-logo", "group-title"):
+                                    if k in entry:
+                                        attrs.append(f'{k}="{entry[k]}"')
+                                extinf = "#EXTINF:0 " + " ".join(attrs) + "," + display + "\n"
+                                f.write(extinf)
+                                f.write(entry["url"] + "\n")
+                        else:
+                            f.write(ln)
+                self.status.showMessage(f"Wrote {fn}", 5000)
         else:
-            out = os.path.join(outd, f"{base}_all.m3u")
-            with open(out, "w", encoding="utf-8") as f:
-                i = 0
-                while i < len(self.original_lines):
-                    ln = self.original_lines[i]
+            # Single merged file (without untested)
+            fn = os.path.join(outd, f"{base}_all.m3u")
+            with open(fn, "w", encoding="utf-8") as f:
+                f.write(header)
+                for ln in self.original_lines:
                     if ln.startswith("#EXTINF") and (m := CUID_RE.search(ln)):
                         uid = m.group(1)
                         entry = self.entry_map.get(uid)
                         if entry:
-                            attrs = [
-                                f'{k}="{entry[k]}"'
-                                for k in ("CUID", "tvg-name", "tvg-id", "tvg-logo", "group-title")
-                                if k in entry
-                            ]
-                            new_ext = "#EXTINF:0 " + " ".join(attrs) + "," + entry["name"] + "\n"
-                            f.write(new_ext)
-                            if i + 1 < len(self.original_lines):
-                                f.write(self.original_lines[i + 1])
-                            i += 2
-                            continue
-                    f.write(ln)
-                    i += 1
-            self.status.showMessage(f"Wrote {out}", 3000)
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    win = IPTVChecker()
-    win.show()
-    sys.exit(app.exec_())
+                            display = clean_name(entry["name"])
+                            if self.update_quality and entry.get("res"):
+                                display += " " + resolution_to_label(entry["res"])
+                            if self.update_fps and entry.get("fps"):
+                                display += " " + format_fps(entry["fps"])
+                            attrs = []
+                            for k in ("CUID", "tvg-name", "tvg-id", "tvg-logo", "group-title"):
+                                if k in entry:
+                                    attrs.append(f'{k}="{entry[k]}"')
+                            extinf = "#EXTINF:0 " + " ".join(attrs) + "," + display + "\n"
+                            f.write(extinf)
+                            f.write(entry["url"] + "\n")
+                    else:
+                        f.write(ln)
+            self.status.showMessage(f"Wrote {fn}", 5000)
