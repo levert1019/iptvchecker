@@ -1,5 +1,5 @@
 from typing import List, Dict
-from parser import parse_groups
+from services.parser import parse_groups
 
 def sort_entries(
     m3u_path: str,

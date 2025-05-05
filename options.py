@@ -2,7 +2,7 @@
 
 import os
 from PyQt5 import QtWidgets, QtCore
-from parser import parse_groups
+from services.parser import parse_groups
 from styles import STYLE_SHEET
 from dialogs import GroupSelectionDialog
 
