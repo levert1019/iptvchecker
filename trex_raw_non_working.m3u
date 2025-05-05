@@ -1,0 +1,5 @@
+#EXTM3U
+#EXTINF:0 CUID="13744" tvg-name="WELT DER WUNDER TV" tvg-ID="don.welt_der_wunder_tv.de" tvg-logo="https://dontv.shop/png/DE/weltderwunder.png" group-title="DE - ALLGEMEIN",WELT DER WUNDER TV
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411330.ts
+#EXTINF:0 CUID="13752" tvg-name="### REGIONALSENDER ###" tvg-ID="dummy-13752" tvg-logo="http://dontv.shop/player/img/logo3.png" group-title="DE - ALLGEMEIN",### REGIONALSENDER ###
+http://line.trx-ott.com/live/4e8b61614f/0b37a09e3551/411318.ts

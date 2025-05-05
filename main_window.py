@@ -4,13 +4,13 @@ import queue
 import threading
 import re
 from PyQt5 import QtWidgets, QtCore
-from parser import parse_groups
-from workers import WorkerThread
-from utils import clean_name, resolution_to_label, format_fps
+from services.parser import parse_groups
+from services.workers import WorkerThread
+from services.utils import clean_name, resolution_to_label, format_fps
 from styles import STYLE_SHEET
 from options import OptionsDialog
-from output_writer import write_output_files
-from playlist_sorter import sort_entries, write_sorted
+from services.output_writer import write_output_files
+from services.playlist_sorter import sort_entries, write_sorted
 
 # Regex to extract CUID from an EXTINF line
 CUID_RE = re.compile(r'CUID="([^"]+)"')

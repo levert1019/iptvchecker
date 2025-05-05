@@ -10,17 +10,17 @@ from services.output_writer import write_output_files
 from services.utils import clean_name, resolution_to_label, format_fps
 
 class CheckerController(QtCore.QObject):
-    """
-    Encapsulates all of the IPTV‐checking logic and writes status
-    messages to the MainWindow's statusBar().
-    """
+    # Signals to marshal UI updates back to the main thread
+    sig_log    = QtCore.pyqtSignal(str, str)    # level, message
+    sig_status = QtCore.pyqtSignal(str, int)    # message, timeout_ms
+
     def __init__(self, ui, options_dialog, main_window):
         super().__init__()
         self.ui     = ui
         self.opts   = options_dialog
         self.main   = main_window
 
-        # --- Default options ---
+        # Default option values
         self.m3u_file         = ""
         self.workers          = 5
         self.retries          = 2
@@ -32,7 +32,7 @@ class CheckerController(QtCore.QObject):
         self.output_dir       = os.getcwd()
         self.selected_groups  = []
 
-        # --- Runtime state ---
+        # Runtime state
         self.original_lines = []
         self.group_entries  = {}
         self.categories     = {}
@@ -42,10 +42,14 @@ class CheckerController(QtCore.QObject):
         self.log_records    = []
         self._is_paused     = False
 
-        # Poll‐timer for thread completion
+        # Poll‐timer for detecting when threads finish
         self._poll_timer = QtCore.QTimer(self)
         self._poll_timer.setInterval(200)
         self._poll_timer.timeout.connect(self._monitor_threads)
+
+        # Connect our new signals to UI slots
+        self.sig_log   .connect(self._on_log)
+        self.sig_status.connect(self._show_status)
 
         self._connect_signals()
 
@@ -54,11 +58,10 @@ class CheckerController(QtCore.QObject):
         self.ui.btn_pause.clicked.connect(self._toggle_pause)
         self.ui.btn_stop.clicked.connect(self.stop_check)
         self.ui.cb_show_working.stateChanged.connect(self._refresh_console)
-        self.ui.cb_show_info.stateChanged.connect(self._refresh_console)
-        self.ui.cb_show_error.stateChanged.connect(self._refresh_console)
+        self.ui.cb_show_info   .stateChanged.connect(self._refresh_console)
+        self.ui.cb_show_error  .stateChanged.connect(self._refresh_console)
 
     def start_check(self):
-        # Read options from dialog
         opts = self.opts.get_options()
         self.m3u_file         = opts["m3u_file"]
         self.workers          = opts["workers"]
@@ -78,18 +81,18 @@ class CheckerController(QtCore.QObject):
             )
             return
 
-        # Load and parse
+        # Load & parse
         with open(self.m3u_file, "r", encoding="utf-8") as f:
             self.original_lines = f.readlines()
         self.group_entries, self.categories = parse_groups(self.m3u_file)
 
-        # Clear tables and console
+        # Clear prior results
         for status in ("working", "black_screen", "non_working"):
             getattr(self.ui, f"tbl_{status}").setRowCount(0)
         self.log_records.clear()
         self.ui.te_console.clear()
 
-        # Build entry & status maps
+        # Build maps
         self.entry_map = {
             e["uid"]: e.copy()
             for grp in self.group_entries.values()
@@ -97,15 +100,16 @@ class CheckerController(QtCore.QObject):
         }
         self.status_map = {}
 
-        # Enqueue tasks
+        # Enqueue
         q = queue.Queue()
         for grp in self.selected_groups:
             for e in self.group_entries.get(grp, []):
                 q.put(e.copy())
 
-        # Show queued message in MainWindow's status bar
-        self.main.statusBar().showMessage(
-            f"Queued {q.qsize()} tasks from {len(self.selected_groups)} groups", 3000
+        # Show queued message via signal
+        self.sig_status.emit(
+            f"Queued {q.qsize()} tasks from {len(self.selected_groups)} groups", 
+            3000
         )
 
         # Start worker threads
@@ -113,7 +117,7 @@ class CheckerController(QtCore.QObject):
         for _ in range(self.workers):
             t = WorkerThread(q, self.retries, self.timeout)
             t.result.connect(self._on_result)
-            t.log.connect(self._on_log)
+            t.log   .connect(lambda lvl, msg: self.sig_log.emit(lvl, msg))
             t.start()
             self.threads.append(t)
 
@@ -133,6 +137,7 @@ class CheckerController(QtCore.QObject):
 
         row = tbl.rowCount()
         tbl.insertRow(row)
+
         display = clean_name(entry["name"])
         if status == "UP":
             if self.update_quality:
@@ -152,9 +157,14 @@ class CheckerController(QtCore.QObject):
             tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res))
             tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(str(fps)))
 
+    @QtCore.pyqtSlot(str, str)
     def _on_log(self, level, msg):
         self.log_records.append((level, msg))
         self._refresh_console()
+
+    @QtCore.pyqtSlot(str, int)
+    def _show_status(self, message, timeout_ms):
+        self.main.statusBar().showMessage(message, timeout_ms)
 
     def _refresh_console(self):
         self.ui.te_console.clear()
@@ -163,23 +173,24 @@ class CheckerController(QtCore.QObject):
             "info":    self.ui.cb_show_info.isChecked(),
             "error":   self.ui.cb_show_error.isChecked()
         }
-        for lvl, m in self.log_records:
+        for lvl, text in self.log_records:
             if show.get(lvl, False):
-                self.ui.te_console.append(m)
+                self.ui.te_console.append(text)
 
     def _toggle_pause(self):
         self._is_paused = not self._is_paused
         for t in self.threads:
             t.pause() if self._is_paused else t.resume()
         self.ui.btn_pause.setText("Resume" if self._is_paused else "Pause")
-        self.main.statusBar().showMessage(
-            "Paused" if self._is_paused else "Resumed", 3000
+        self.sig_status.emit(
+            "Paused" if self._is_paused else "Resumed", 
+            3000
         )
 
     def stop_check(self):
         for t in self.threads:
             t.stop()
-        self.main.statusBar().showMessage("Stopping...", 2000)
+        self.sig_status.emit("Stopping...", 2000)
 
     def _monitor_threads(self):
         if all(not t.isRunning() for t in self.threads):
@@ -203,8 +214,8 @@ class CheckerController(QtCore.QObject):
 
         if files:
             for path in files:
-                self._on_log("info", f"Exported M3U: {path}")
-            self.main.statusBar().showMessage(f"Exported {len(files)} file(s)", 3000)
+                self.sig_log.emit("info", f"Exported M3U: {path}")
+            self.sig_status.emit(f"Exported {len(files)} file(s)", 3000)
         else:
-            self._on_log("info", "No export options selected; skipping M3U export.")
-            self.main.statusBar().showMessage("No export; no M3U written", 3000)
+            self.sig_log.emit("info", "No export options selected; skipping M3U export.")
+            self.sig_status.emit("No export; no M3U written", 3000)
