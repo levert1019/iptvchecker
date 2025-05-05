@@ -1,10 +1,11 @@
+# main.py
+
 import sys
-import os
 from PyQt5 import QtWidgets
 from ui.checker_ui import CheckerUI
-from ui.sorter_ui  import SorterUI
+from ui.sorter_ui import SorterUI
 from controllers.checker_controller import CheckerController
-from controllers.sorter_controller  import SorterController
+from controllers.sorter_controller import SorterController
 from options import OptionsDialog
 from styles import STYLE_SHEET
 
@@ -14,78 +15,76 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("DonTV IPTV Checker & Playlist Sorter")
         self.resize(1000, 700)
 
-        # Holders for sharing into OptionsDialog
-        self.categories       = {}
-        self.group_entries    = {}
-        self.selected_groups  = []
-        self.current_m3u_file = ""
-
         self._build_ui()
         self.setStyleSheet(STYLE_SHEET)
 
-        # Options dialog gets updated before each open
-        self.options_dialog = OptionsDialog(self.categories,
-                                            self.group_entries,
-                                            parent=self)
+        # Single Options dialog instance
+        self.options_dialog = OptionsDialog(parent=self)
 
-        # Hook up controllers
-        self.checker_ctrl = CheckerController(self.checker_ui,
-                                              self.options_dialog)
+        # Pass MainWindow into the controller for statusBar()
+        self.checker_ctrl = CheckerController(
+            ui=self.checker_ui,
+            options_dialog=self.options_dialog,
+            main_window=self
+        )
         self.sorter_ctrl  = SorterController(self.sorter_ui)
 
     def _build_ui(self):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
         layout = QtWidgets.QVBoxLayout(central)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0,0,0,0)
         layout.setSpacing(0)
 
-        # Top bar with three buttons
+        # Top bar
         bar = QtWidgets.QFrame()
         bar.setFixedHeight(40)
         bar.setStyleSheet("background-color: #5b2fc9;")
-        bar_layout = QtWidgets.QHBoxLayout(bar)
-        bar_layout.setContentsMargins(10, 0, 0, 0)
+        bl = QtWidgets.QHBoxLayout(bar)
+        bl.setContentsMargins(10,0,0,0)
 
         self.btn_iptv     = QtWidgets.QPushButton("IPTV Checker")
-        self.btn_playlist = QtWidgets.QPushButton("Playlist Sorter")
-        self.btn_options  = QtWidgets.QPushButton("Options")
-        for btn in (self.btn_iptv, self.btn_playlist, self.btn_options):
-            btn.setCheckable(True)
-            btn.setStyleSheet(
-                "color:white; background:transparent; font-weight:bold; border:none;"
-            )
-            bar_layout.addWidget(btn)
-        self.btn_iptv.setChecked(True)  # default
+        self.btn_iptv.setCheckable(True)
+        self.btn_iptv.setChecked(True)
+        self.btn_iptv.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
+        bl.addWidget(self.btn_iptv)
 
-        bar_layout.addStretch()
+        self.btn_playlist = QtWidgets.QPushButton("Playlist Sorter")
+        self.btn_playlist.setCheckable(True)
+        self.btn_playlist.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
+        bl.addWidget(self.btn_playlist)
+
+        self.btn_options  = QtWidgets.QPushButton("Options")
+        self.btn_options.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
+        bl.addWidget(self.btn_options)
+
+        bl.addStretch()
         layout.addWidget(bar)
 
-        # Stacked pages
-        self.pages     = QtWidgets.QStackedWidget()
-        self.checker_ui= CheckerUI()
-        self.sorter_ui = SorterUI()
+        # Pages
+        self.pages      = QtWidgets.QStackedWidget()
+        self.checker_ui = CheckerUI()
+        self.sorter_ui  = SorterUI()
         self.pages.addWidget(self.checker_ui)
         self.pages.addWidget(self.sorter_ui)
         layout.addWidget(self.pages)
 
-        # Wire button clicks
-        self.btn_iptv.clicked    .connect(lambda: self._switch_page(0))
+        # Status bar
+        self.setStatusBar(QtWidgets.QStatusBar())
+
+        # Hookups
+        self.btn_iptv.clicked.connect(lambda: self._switch_page(0))
         self.btn_playlist.clicked.connect(lambda: self._switch_page(1))
-        self.btn_options.clicked .connect(self._open_options)
+        self.btn_options.clicked.connect(self._open_options)
 
     def _switch_page(self, idx):
-        # Toggle the check state
         self.btn_iptv.setChecked(idx == 0)
         self.btn_playlist.setChecked(idx == 1)
         self.pages.setCurrentIndex(idx)
 
     def _open_options(self):
-        # Before opening, sync in the latest state from the checker controller
+        # Sync every field before showing
         cc = self.checker_ctrl
-        self.options_dialog.categories       = cc.categories
-        self.options_dialog.group_urls       = cc.group_entries
-        self.options_dialog.selected_groups  = cc.selected_groups
         self.options_dialog.le_m3u.setText(cc.m3u_file)
         self.options_dialog.le_out.setText(cc.output_dir)
         self.options_dialog.sp_workers.setValue(cc.workers)
@@ -95,9 +94,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.options_dialog.cb_update_quality.setChecked(cc.update_quality)
         self.options_dialog.cb_update_fps.setChecked(cc.update_fps)
         self.options_dialog.cb_include_untested.setChecked(cc.include_untested)
+        self.options_dialog.selected_groups = list(cc.selected_groups)
 
         if self.options_dialog.exec_() == QtWidgets.QDialog.Accepted:
-            # New settings are picked up by CheckerController on next start_check()
+            # New settings will be re‐read by CheckerController.start_check()
             pass
 
 if __name__ == "__main__":
