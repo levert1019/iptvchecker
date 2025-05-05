@@ -1,92 +1,91 @@
-# output_writer.py
-
 import os
 import re
-from utils import clean_name, resolution_to_label, format_fps
-
-# Regex to extract CUID from an EXTINF line
-CUID_RE = re.compile(r'CUID=\"([^\\\"]+)\"')
-
-# Build EXTINF line with optional quality/fps updates,
-# and ensure tvg-name matches the updated display.
-def build_extinf(entry, update_quality=False, update_fps=False):
-    # Base channel name
-    base_name = clean_name(entry['name'])
-
-    # Apply quality/fps updates
-    display = base_name
-    if update_quality and entry.get('res'):
-        display += ' ' + resolution_to_label(entry['res'])
-    if update_fps and entry.get('fps'):
-        display += ' ' + format_fps(entry['fps'])
-
-    # Always include CUID and tvg-name
-    attrs = [f'CUID="{entry["uid"]}"',
-             f'tvg-name="{display}"']
-
-    # Preserve all other tvg-*/group/catchup attributes
-    for k, v in entry.items():
-        if k.startswith('tvg-') or k in ('group-title','catchup-type','catchup-days'):
-            attrs.append(f'{k}="{v}"')
-
-    return f"#EXTINF:0 {' '.join(attrs)},{display}\n"
+from utils import resolution_to_label, format_fps
 
 
-# Write M3U outputs in the original order.
-# Returns list of the file paths that were written.
-def write_output_files(original_lines, entry_map, statuses,
-                       base_name, output_dir,
-                       split=False, update_quality=False,
-                       update_fps=False, include_untested=False):
-    header = "#EXTM3U\n"
+def write_output_files(original_lines, entry_map, statuses, base_name, output_dir,
+                       split=False, update_quality=False, update_fps=False,
+                       include_untested=False):
+    """
+    Writes M3U output files based on user options.
+    - split: if True, outputs separate files for each status.
+    - update_quality: append resolution label to channel name.
+    - update_fps: append FPS label to channel name.
+    - include_untested: include entries never tested.
+    Returns a list of generated file paths.
+    """
+    # Do nothing if no options selected
+    if not any([split, update_quality, update_fps, include_untested]):
+        return []
 
-    # 1) Extract UIDs in the order they appear in the source
-    ordered_uids = []
-    for ln in original_lines:
-        if ln.startswith('#EXTINF') and (m := CUID_RE.search(ln)):
-            uid = m.group(1)
-            if uid not in ordered_uids:
-                ordered_uids.append(uid)
+    # Organize entries by test status
+    groups = {'working': [], 'blackscreen': [], 'notworking': []}
+    for cuid, entry in entry_map.items():
+        status = statuses.get(cuid, 'untested')
+        if status == 'ok':
+            groups['working'].append(entry)
+        elif status == 'black':
+            groups['blackscreen'].append(entry)
+        elif status == 'fail':
+            groups['notworking'].append(entry)
+    
+    # Helper to collect untested entries
+    untested = [entry for cuid, entry in entry_map.items() if statuses.get(cuid) is None]
 
-    written = []
+    def write(entries, suffix):
+        filename = f"{base_name}{suffix}.m3u"
+        path = os.path.join(output_dir, filename)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('#EXTM3U\n')
+            for entry in entries:
+                ext = build_extinf(entry, update_quality, update_fps)
+                f.write(ext + '\n')
+                f.write(entry['uri'] + '\n')
+        return path
 
-    def _write_by_status(suffix, target_status):
-        fn = os.path.join(output_dir, f"{base_name}_{suffix}.m3u")
-        with open(fn, 'w', encoding='utf-8') as f:
-            f.write(header)
-            for uid in ordered_uids:
-                if statuses.get(uid) == target_status:
-                    e = entry_map.get(uid)
-                    if e:
-                        f.write(build_extinf(e, update_quality, update_fps))
-                        f.write(e['url'] + '\n')
-        written.append(fn)
-
+    output_paths = []
     if split:
-        _write_by_status('working',    'UP')
-        _write_by_status('blackscreen','BLACK_SCREEN')
-        _write_by_status('notworking','NON_WORKING')
-
+        output_paths.append(write(groups['working'], '_working'))
+        output_paths.append(write(groups['blackscreen'], '_blackscreen'))
+        output_paths.append(write(groups['notworking'], '_notworking'))
         if include_untested:
-            fn = os.path.join(output_dir, f"{base_name}_all.m3u")
-            with open(fn, 'w', encoding='utf-8') as f:
-                f.write(header)
-                for uid in ordered_uids:
-                    if statuses.get(uid) in ('UP','BLACK_SCREEN','NON_WORKING'):
-                        e = entry_map.get(uid)
-                        if e:
-                            f.write(build_extinf(e, update_quality, update_fps))
-                            f.write(e['url'] + '\n')
-            written.append(fn)
+            all_entries = groups['working'] + groups['blackscreen'] + groups['notworking'] + untested
+            output_paths.append(write(all_entries, '_all'))
     else:
-        fn = os.path.join(output_dir, f"{base_name}_all.m3u")
-        with open(fn, 'w', encoding='utf-8') as f:
-            f.write(header)
-            for uid in ordered_uids:
-                e = entry_map.get(uid)
-                if e:
-                    f.write(build_extinf(e, update_quality, update_fps))
-                    f.write(e['url'] + '\n')
-        written.append(fn)
+        combined = groups['working'] + groups['blackscreen'] + groups['notworking']
+        if include_untested:
+            combined += untested
+        output_paths.append(write(combined, '_all'))
 
-    return written
+    return output_paths
+
+
+def build_extinf(entry, update_quality=False, update_fps=False):
+    """
+    Reconstructs the EXTINF line, preserving all original attributes
+    and optionally appending resolution/FPS labels to the display name.
+    """
+    # Copy all original attributes
+    attrs = entry.get('attributes', {}).copy()
+    # Base display name is from tvg-name or fallback to parsed name
+    display_name = attrs.get('tvg-name', entry.get('name', ''))
+    # Remove any existing FPS superscripts for fresh labeling
+    base_display = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹⁰]+fps', '', display_name)
+
+    # Append resolution label if requested
+    if update_quality:
+        res_label = resolution_to_label(entry.get('resolution'))
+        if res_label:
+            base_display = f"{base_display} {res_label}"
+            attrs['tvg-name'] = base_display
+    # Append FPS label if requested
+    if update_fps:
+        fps_label = format_fps(entry.get('fps'))
+        if fps_label:
+            base_display = f"{base_display} {fps_label}"
+            attrs['tvg-name'] = base_display
+
+    # Reconstruct attribute string (order preserved by dict)
+    attr_str = ' '.join(f'{k}="{v}"' for k, v in attrs.items())
+    # Final EXTINF line
+    return f"#EXTINF:0 {attr_str},{base_display}"
