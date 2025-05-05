@@ -1,59 +1,87 @@
+# playlist_sorter_window.py
+
 from PyQt5 import QtWidgets, QtCore
 
-class SorterUI(QtWidgets.QWidget):
+class SorterUI(QtWidgets.QMainWindow):
     """
-    UI definition for the Playlist Sorter page.
-    Exposes:
-      - le_sort_m3u       (QLineEdit)
-      - btn_browse        (QPushButton)
-      - tree_groups       (QTreeWidget)
-      - cb_alpha          (QCheckBox)
-      - btn_generate      (QPushButton)
+    A simplified UI for the Playlist Sorter:
+      - Big header
+      - Styled console area (same look as IPTV Checker)
+      - Checkboxes for Show Working / Show Info / Show Error
     """
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowTitle("Playlist Sorter")
+        self.resize(800, 600)
         self._build_ui()
 
     def _build_ui(self):
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(20)
+        # Central widget & layout
+        central = QtWidgets.QWidget(self)
+        v = QtWidgets.QVBoxLayout(central)
+        v.setContentsMargins(10, 10, 10, 10)
+        v.setSpacing(10)
 
-        # Header (rich text)
-        hdr = QtWidgets.QLabel()
-        hdr.setTextFormat(QtCore.Qt.RichText)
-        hdr.setText(
-            '<span style="font-size:24pt; color:#FFFFFF; font-weight:bold;">Don</span>'
-            '<span style="font-size:24pt; color:#5b2fc9; font-weight:bold;">TV</span>'
-            '<span style="font-size:18pt; color:#FFFFFF; font-weight:bold;"> Playlist Sorter</span>'
-        )
-        hdr.setAlignment(QtCore.Qt.AlignCenter)
-        layout.addWidget(hdr)
+        # ── Header ───────────────────────────────────────────────
+        header = QtWidgets.QLabel("Playlist Sorter")
+        header.setAlignment(QtCore.Qt.AlignCenter)
+        font = header.font()
+        font.setPointSize(20)
+        font.setBold(True)
+        header.setFont(font)
+        v.addWidget(header)
 
-        # File selector row
-        file_h = QtWidgets.QHBoxLayout()
-        self.le_sort_m3u = QtWidgets.QLineEdit()
-        self.btn_browse  = QtWidgets.QPushButton("Browse…")
-        file_h.addWidget(self.le_sort_m3u)
-        file_h.addWidget(self.btn_browse)
-        layout.addLayout(file_h)
+        # ── Console GroupBox ────────────────────────────────────
+        gb = QtWidgets.QGroupBox("Console")
+        gb.setStyleSheet("""
+            QGroupBox { 
+                border:2px solid #5b2fc9; 
+                border-radius:5px; 
+                margin-top:6px; 
+            }
+            QGroupBox::title { 
+                background:#5b2fc9; 
+                color:white; 
+                subcontrol-origin:margin; 
+                left:10px; 
+                padding:0 3px; 
+            }
+        """)
+        vb = QtWidgets.QVBoxLayout(gb)
 
-        # Draggable group-order tree
-        self.tree_groups = QtWidgets.QTreeWidget()
-        self.tree_groups.setHeaderLabels(["Group Name"])
-        self.tree_groups.setDragDropMode(
-            QtWidgets.QAbstractItemView.InternalMove
-        )
-        layout.addWidget(self.tree_groups, 1)
+        # The console itself
+        self.console = QtWidgets.QPlainTextEdit()
+        self.console.setReadOnly(True)
+        self.console.setStyleSheet("""
+            background-color: black;
+            color: white;
+            font-family: Consolas, 'Courier New', monospace;
+        """)
+        vb.addWidget(self.console)
 
-        # Sort options
-        opts_h = QtWidgets.QHBoxLayout()
-        self.cb_alpha = QtWidgets.QCheckBox("Sort channels alphabetically")
-        self.cb_alpha.setChecked(True)
-        opts_h.addWidget(self.cb_alpha)
-        opts_h.addStretch()
-        layout.addLayout(opts_h)
+        # ── Log-Level Checkboxes ────────────────────────────────
+        hb = QtWidgets.QHBoxLayout()
+        self.cb_show_working = QtWidgets.QCheckBox("Show Working")
+        self.cb_show_info    = QtWidgets.QCheckBox("Show Info")
+        self.cb_show_error   = QtWidgets.QCheckBox("Show Error")
+        # default to showing errors
+        self.cb_show_error.setChecked(True)
 
-        # Generate button
-        self.btn_generate = QtWidgets.QPushButton("Generate Sorted Playlist")
-        layout.addWidget(self.btn_generate)
+        hb.addWidget(self.cb_show_working)
+        hb.addWidget(self.cb_show_info)
+        hb.addWidget(self.cb_show_error)
+        hb.addStretch()
+
+        vb.addLayout(hb)
+        v.addWidget(gb)
+
+        # Set central widget
+        self.setCentralWidget(central)
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    win = PlaylistSorterWindow()
+    win.show()
+    sys.exit(app.exec_())

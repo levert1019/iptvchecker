@@ -5,7 +5,6 @@ from PyQt5 import QtWidgets, QtCore
 from ui.checker_ui import CheckerUI
 from ui.sorter_ui import SorterUI
 from controllers.checker_controller import CheckerController
-from controllers.sorter_controller import SorterController
 from options import OptionsDialog
 from styles import STYLE_SHEET
 
@@ -86,7 +85,6 @@ class MainWindow(QtWidgets.QMainWindow):
             options_dialog=self.options_dialog,
             main_window=self
         )
-        self.sorter_ctrl = SorterController(self.sorter_ui)
 
         # hook up nav buttons
         self.btn_iptv.clicked    .connect(lambda: self._switch_page(0))
