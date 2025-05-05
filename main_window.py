@@ -10,11 +10,16 @@ from utils import clean_name, resolution_to_label, format_fps
 from styles import STYLE_SHEET
 from options import OptionsDialog
 from output_writer import write_output_files
+from playlist_sorter import sort_entries, write_sorted
 
 # Regex to extract CUID from an EXTINF line
-CUID_RE = re.compile(r'CUID="([^\\"]+)"')
+CUID_RE = re.compile(r'CUID="([^"]+)"')
 
 class IPTVChecker(QtWidgets.QMainWindow):
+    # Signals for thread-safe UI updates
+    export_log    = QtCore.pyqtSignal(str, str)   # level, message
+    export_status = QtCore.pyqtSignal(str, int)   # message, timeout_ms
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("DonTV IPTV Checker & Playlist Sorter")
@@ -49,6 +54,10 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self._build_ui()
         self.setStyleSheet(STYLE_SHEET)
 
+        # Connect signals for UI updates
+        self.export_log.connect(self._on_log)
+        self.export_status.connect(self.status.showMessage)
+
     def _build_ui(self):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
@@ -63,21 +72,25 @@ class IPTVChecker(QtWidgets.QMainWindow):
         bar_layout = QtWidgets.QHBoxLayout(bar)
         bar_layout.setContentsMargins(10, 0, 0, 0)
         btn_group = QtWidgets.QButtonGroup(self)
+
         btn_iptv = QtWidgets.QPushButton("IPTV Checker")
         btn_iptv.setCheckable(True)
         btn_iptv.setChecked(True)
         btn_iptv.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
         btn_group.addButton(btn_iptv)
         bar_layout.addWidget(btn_iptv)
+
         btn_playlist = QtWidgets.QPushButton("Playlist Sorter")
         btn_playlist.setCheckable(True)
         btn_playlist.setStyleSheet("color:white; background:transparent; font-weight:bold; border:none;")
         btn_group.addButton(btn_playlist)
         bar_layout.addWidget(btn_playlist)
+
         btn_options = QtWidgets.QPushButton("Options")
         btn_options.setStyleSheet("color:white; background:transparent; border:none;")
         btn_options.clicked.connect(self._open_options)
         bar_layout.addWidget(btn_options)
+
         bar_layout.addStretch()
         main_v.addWidget(bar)
 
@@ -85,26 +98,28 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.pages = QtWidgets.QStackedWidget()
         main_v.addWidget(self.pages)
 
-        # Page 0: IPTV Checker UI
+        # --- Page 0: IPTV Checker ---
         page0 = QtWidgets.QWidget()
         pv0 = QtWidgets.QVBoxLayout(page0)
         pv0.setContentsMargins(10, 10, 10, 10)
         pv0.setSpacing(20)
 
-        # Header with rich text
+        # Header
         hdr0 = QtWidgets.QLabel()
         hdr0.setTextFormat(QtCore.Qt.RichText)
         hdr0.setText(
-            '<span style="font-size:24pt; font-weight:bold; color:#FFFFFF;">Don</span>'
-            '<span style="font-size:24pt; font-weight:bold; color:#5b2fc9;">TV</span>'
-            '<span style="font-size:18pt; font-weight:bold; color:#FFFFFF;"> IPTV Checker</span>'
+            '<span style="font-size:24pt; color:#FFFFFF; font-weight:bold;">Don</span>'
+            '<span style="font-size:24pt; color:#5b2fc9; font-weight:bold;">TV</span>'
+            '<span style="font-size:18pt; color:#FFFFFF; font-weight:bold;"> IPTV Checker</span>'
         )
         hdr0.setAlignment(QtCore.Qt.AlignCenter)
         pv0.addWidget(hdr0)
 
-        # Controls row
+        # Controls
         ctrl_h = QtWidgets.QHBoxLayout()
-        for text, slot in [("Start", self.start_check), ("Pause", self._toggle_pause), ("Stop", self.stop_check)]:
+        for text, slot in [("Start", self.start_check),
+                           ("Pause", self._toggle_pause),
+                           ("Stop", self.stop_check)]:
             btn = QtWidgets.QPushButton(text)
             btn.setFixedSize(130, 45)
             btn.clicked.connect(slot)
@@ -136,8 +151,8 @@ class IPTVChecker(QtWidgets.QMainWindow):
         console_v = QtWidgets.QVBoxLayout(console_grp)
         flt_h = QtWidgets.QHBoxLayout()
         self.cb_show_working = QtWidgets.QCheckBox("Show Working")
-        self.cb_show_info = QtWidgets.QCheckBox("Show Info")
-        self.cb_show_error = QtWidgets.QCheckBox("Show Error")
+        self.cb_show_info    = QtWidgets.QCheckBox("Show Info")
+        self.cb_show_error   = QtWidgets.QCheckBox("Show Error")
         for cb in (self.cb_show_working, self.cb_show_info, self.cb_show_error):
             cb.setChecked(True)
             cb.stateChanged.connect(self._refresh_console)
@@ -147,30 +162,57 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.te_console.setReadOnly(True)
         console_v.addWidget(self.te_console)
         pv0.addWidget(console_grp)
+
         self.pages.addWidget(page0)
 
-        # Page 1: Playlist Sorter UI
+        # --- Page 1: Playlist Sorter ---
         page1 = QtWidgets.QWidget()
-        pv1 = QtWidgets.QVBoxLayout(page1)
+        pv1   = QtWidgets.QVBoxLayout(page1)
         pv1.setContentsMargins(10, 10, 10, 10)
         pv1.setSpacing(20)
 
-        # Header with rich text
+        # Header
         hdr1 = QtWidgets.QLabel()
         hdr1.setTextFormat(QtCore.Qt.RichText)
         hdr1.setText(
-            '<span style="font-size:24pt; font-weight:bold; color:#FFFFFF;">Don</span>'
-            '<span style="font-size:24pt; font-weight:bold; color:#5b2fc9;">TV</span>'
-            '<span style="font-size:18pt; font-weight:bold; color:#FFFFFF;"> Playlist Sorter</span>'
+            '<span style="font-size:24pt; color:#FFFFFF; font-weight:bold;">Don</span>'
+            '<span style="font-size:24pt; color:#5b2fc9; font-weight:bold;">TV</span>'
+            '<span style="font-size:18pt; color:#FFFFFF; font-weight:bold;"> Playlist Sorter</span>'
         )
         hdr1.setAlignment(QtCore.Qt.AlignCenter)
         pv1.addWidget(hdr1)
 
-        placeholder = QtWidgets.QLabel("Playlist Sorter functionality coming soon.")
-        placeholder.setAlignment(QtCore.Qt.AlignCenter)
-        pv1.addWidget(placeholder)
+        # File selector
+        h_file = QtWidgets.QHBoxLayout()
+        self.le_sort_m3u = QtWidgets.QLineEdit()
+        btn_browse = QtWidgets.QPushButton("Browse…")
+        btn_browse.clicked.connect(self._browse_sort_file)
+        h_file.addWidget(self.le_sort_m3u)
+        h_file.addWidget(btn_browse)
+        pv1.addLayout(h_file)
+
+        # Group-order tree
+        self.tree_groups = QtWidgets.QTreeWidget()
+        self.tree_groups.setHeaderLabels(["Group Name"])
+        self.tree_groups.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        pv1.addWidget(self.tree_groups, 1)
+
+        # Sort options
+        opt_h = QtWidgets.QHBoxLayout()
+        self.cb_alpha = QtWidgets.QCheckBox("Sort channels alphabetically")
+        self.cb_alpha.setChecked(True)
+        opt_h.addWidget(self.cb_alpha)
+        opt_h.addStretch()
+        pv1.addLayout(opt_h)
+
+        # Generate button
+        btn_sort = QtWidgets.QPushButton("Generate Sorted Playlist")
+        btn_sort.clicked.connect(self._run_sorter)
+        pv1.addWidget(btn_sort)
+
         self.pages.addWidget(page1)
 
+        # Page switching
         btn_iptv.clicked.connect(lambda: self.pages.setCurrentIndex(0))
         btn_playlist.clicked.connect(lambda: self.pages.setCurrentIndex(1))
 
@@ -225,7 +267,9 @@ class IPTVChecker(QtWidgets.QMainWindow):
         self.te_console.clear()
 
         self.entry_map = {
-            e["uid"]: e.copy() for grp in self.group_entries.values() for e in grp
+            e["uid"]: e.copy()
+            for grp in self.group_entries.values()
+            for e in grp
         }
         self.status_map = {}
 
@@ -299,7 +343,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
         }
         for lvl, m in self.log_records:
             if show.get(lvl, False):
-                self.te_console.append(f"{m}")
+                self.te_console.append(m)
 
     def _toggle_pause(self):
         self._is_paused = not self._is_paused
@@ -319,6 +363,7 @@ class IPTVChecker(QtWidgets.QMainWindow):
             threading.Thread(target=self._write_output_files, daemon=True).start()
 
     def _write_output_files(self):
+        """Run in background thread; emit signals instead of touching UI directly."""
         if not self.m3u_file:
             return
 
@@ -335,15 +380,44 @@ class IPTVChecker(QtWidgets.QMainWindow):
             update_fps=self.update_fps,
             include_untested=self.include_untested
         )
+
         if files:
             for fpath in files:
-                self.log_records.append(("info", f"Exported M3U: {fpath}"))
-            self._refresh_console()
-            self.status.showMessage(f"Exported {len(files)} file(s)", 3000)
+                self.export_log.emit("info", f"Exported M3U: {fpath}")
+            self.export_status.emit(f"Exported {len(files)} file(s)", 3000)
         else:
-            self.log_records.append(("info", "No export options selected; skipping M3U export."))
-            self._refresh_console()
-            self.status.showMessage("No export options; no M3U written", 3000)
+            self.export_log.emit("info", "No export options selected; skipping M3U export.")
+            self.export_status.emit("No export options; no M3U written", 3000)
+
+    def _browse_sort_file(self):
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Select M3U to sort", filter="*.m3u"
+        )
+        if path:
+            self.le_sort_m3u.setText(path)
+            groups, _ = parse_groups(path)
+            self.tree_groups.clear()
+            for grp in groups:
+                item = QtWidgets.QTreeWidgetItem([grp])
+                self.tree_groups.addTopLevelItem(item)
+
+    def _run_sorter(self):
+        m3u = self.le_sort_m3u.text()
+        if not m3u:
+            QtWidgets.QMessageBox.warning(
+                self, "Missing File", "Please pick an M3U first."
+            )
+            return
+
+        group_order = [
+            self.tree_groups.topLevelItem(i).text(0)
+            for i in range(self.tree_groups.topLevelItemCount())
+        ]
+        key = "name" if self.cb_alpha.isChecked() else "uid"
+        lines = sort_entries(m3u, group_order, channel_sort_key=key)
+        out_path = os.path.splitext(m3u)[0] + "_sorted.m3u"
+        write_sorted(lines, out_path)
+        self.status.showMessage(f"Sorted playlist written to {out_path}", 3000)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
