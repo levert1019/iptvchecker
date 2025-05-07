@@ -11,9 +11,8 @@ from services.utils import clean_name, resolution_to_label, format_fps
 
 class CheckerController(QtCore.QObject):
     """
-    IPTV‐checking logic, with buffered console and thread‐safe UI updates.
+    IPTV-checking logic, with buffered console and thread-safe UI updates.
     """
-    # Signals for thread‐safe UI updates
     log_signal    = QtCore.pyqtSignal(str, str)  # (level, message)
     status_signal = QtCore.pyqtSignal(str, int)  # (message, timeout_ms)
 
@@ -44,41 +43,41 @@ class CheckerController(QtCore.QObject):
         self.threads        = []
         self._is_paused     = False
 
-        # Buffer for all console logs
+        # Log buffer
         self.log_records: list[tuple[str,str]] = []
 
-        # Poll‐timer to detect when worker threads finish
+        # Monitor timer
         self._poll_timer = QtCore.QTimer(self)
         self._poll_timer.setInterval(200)
         self._poll_timer.timeout.connect(self._monitor_threads)
 
-        # Connect signals for thread‐safe UI work
+        # Connect signals
         self.log_signal.connect(self._on_log)
         self.status_signal.connect(self.main.statusBar().showMessage)
-
         self._connect_signals()
 
     def _connect_signals(self):
-        # Buttons
         self.ui.btn_start.clicked.connect(self.start_check)
         self.ui.btn_pause.clicked.connect(self._toggle_pause)
         self.ui.btn_stop.clicked.connect(self.stop_check)
-        # Console filter toggles
         self.ui.cb_show_working.stateChanged.connect(self._refresh_console)
-        self.ui.cb_show_info   .stateChanged.connect(self._refresh_console)
-        self.ui.cb_show_error  .stateChanged.connect(self._refresh_console)
+        self.ui.cb_show_info.stateChanged.connect(self._refresh_console)
+        self.ui.cb_show_error.stateChanged.connect(self._refresh_console)
 
     def start_check(self):
+        # Load the latest options
         opts = self.opts.get_options()
-        ( self.m3u_file, self.workers, self.retries, self.timeout,
-          self.split, self.update_quality, self.update_fps,
-          self.include_untested, self.output_dir,
-          self.selected_groups ) = (
-              opts["m3u_file"], opts["workers"], opts["retries"], opts["timeout"],
-              opts["split"], opts["update_quality"], opts["update_fps"],
-              opts["include_untested"], opts["output_dir"], opts["selected_groups"]
+        (
+            self.m3u_file, self.workers, self.retries, self.timeout,
+            self.split, self.update_quality, self.update_fps,
+            self.include_untested, self.output_dir, self.selected_groups
+        ) = (
+            opts["m3u_file"], opts["workers"], opts["retries"], opts["timeout"],
+            opts["split"], opts["update_quality"], opts["update_fps"],
+            opts["include_untested"], opts["output_dir"], opts["selected_groups"]
         )
 
+        # Validate
         if not self.m3u_file or not self.selected_groups:
             QtWidgets.QMessageBox.warning(
                 self.ui, "Missing Settings",
@@ -86,65 +85,80 @@ class CheckerController(QtCore.QObject):
             )
             return
 
-        # Load & parse
+        # Read file
         with open(self.m3u_file, "r", encoding="utf-8") as f:
             self.original_lines = f.readlines()
+        # Parse groups
         self.group_entries, self.categories = parse_groups(self.m3u_file)
 
-        # Clear tables
-        for s in ("working", "black_screen", "non_working"):
-            getattr(self.ui, f"tbl_{s}").setRowCount(0)
-
-        # Reset console buffer and view
+        # Reset UI & console
+        for tbl in (self.ui.tbl_working, self.ui.tbl_black_screen, self.ui.tbl_non_working):
+            tbl.setRowCount(0)
         self.log_records.clear()
         self._refresh_console()
 
-        # Build lookup maps
-        self.entry_map = {
-            e["uid"]: e.copy()
-            for grp in self.group_entries.values()
-            for e in grp
-        }
+        # Debug: list parsed and selected
+        self.log_signal.emit("working", f"[DEBUG] Parsed groups: {list(self.group_entries.keys())}")
+        self.log_signal.emit("working", f"[DEBUG] Selected groups: {self.selected_groups}")
+
+        # Match selection
+        valid = []
+        lookup = {k.lower(): k for k in self.group_entries}
+        for sg in self.selected_groups:
+            key = lookup.get(sg.lower())
+            if key:
+                valid.append(key)
+            else:
+                matches = [k for k in self.group_entries if sg.lower() in k.lower()]
+                if matches:
+                    valid.extend(matches)
+                    self.log_signal.emit("working", f"[DEBUG] '{sg}' matched {matches}")
+                else:
+                    self.log_signal.emit("error", f"No match for '{sg}'")
+        if not valid:
+            valid = list(self.group_entries.keys())
+            self.log_signal.emit("working", "[DEBUG] No valid selection; defaulting to ALL groups")
+        self.selected_groups = valid
+
+        # Debug: final used groups
+        self.log_signal.emit("working", f"[DEBUG] Using groups: {self.selected_groups}")
+
+        # Build entry lookup
+        self.entry_map = {e["uid"]: e.copy()
+                          for entries in self.group_entries.values()
+                          for e in entries}
         self.status_map = {}
 
-        # Enqueue tasks
+        # Enqueue
         q = queue.Queue()
         for grp in self.selected_groups:
-            for e in self.group_entries.get(grp, []):
-                q.put(e.copy())
+            for entry in self.group_entries.get(grp, []):
+                q.put(entry.copy())
+        # Debug queued
+        self.log_signal.emit("working", f"[DEBUG] Queued {q.qsize()} entries for checking")
+        self.status_signal.emit(f"Queued {q.qsize()} tasks", 3000)
 
-        # Thread‐safe status bar message
-        self.status_signal.emit(
-            f"Queued {q.qsize()} tasks from {len(self.selected_groups)} groups",
-            3000
-        )
-
-        # Start worker threads
+        # Start threads
         self.threads = []
         for _ in range(self.workers):
             t = WorkerThread(q, self.retries, self.timeout)
             t.result.connect(self._on_result)
-            # route worker logs through our signal
             t.log.connect(lambda lvl, m: self.log_signal.emit(lvl, m))
             t.start()
             self.threads.append(t)
-
         self._poll_timer.start()
 
     def _on_result(self, entry, status, res, fps):
         uid = entry["uid"]
-        self.status_map[uid]              = status
+        self.status_map[uid] = status
         self.entry_map[uid]["resolution"] = res
-        self.entry_map[uid]["fps"]        = fps
+        self.entry_map[uid]["fps"] = fps
 
-        tbl = {
-            "UP":           self.ui.tbl_working,
-            "BLACK_SCREEN": self.ui.tbl_black_screen
-        }.get(status, self.ui.tbl_non_working)
+        tbl = {"UP": self.ui.tbl_working,
+               "BLACK_SCREEN": self.ui.tbl_black_screen}.get(status, self.ui.tbl_non_working)
 
         row = tbl.rowCount()
         tbl.insertRow(row)
-
         display = clean_name(entry["name"])
         if status == "UP":
             if self.update_quality:
@@ -153,17 +167,14 @@ class CheckerController(QtCore.QObject):
             if self.update_fps:
                 flbl = format_fps(fps)
                 if flbl: display += " " + flbl
-
         item = QtWidgets.QTableWidgetItem(display)
         item.setData(QtCore.Qt.UserRole, uid)
         tbl.setItem(row, 0, item)
-
         if tbl is self.ui.tbl_working:
             tbl.setItem(row, 1, QtWidgets.QTableWidgetItem(res))
             tbl.setItem(row, 2, QtWidgets.QTableWidgetItem(str(fps)))
 
     def _on_log(self, level: str, msg: str):
-        # Buffer every message and re-draw
         self.log_records.append((level, msg))
         self._refresh_console()
 
@@ -173,8 +184,7 @@ class CheckerController(QtCore.QObject):
         for level, msg in self.log_records:
             cb = getattr(self.ui, f"cb_show_{level}", None)
             if cb and cb.isChecked():
-                # QTextEdit.append() accepts HTML
-                self.ui.te_console.append(f'<span style="color:{colors[level]}">{msg}</span>')
+                self.ui.te_console.append(f"<span style='color:{colors[level]}'>{msg}</span>")
 
     def _toggle_pause(self):
         self._is_paused = not self._is_paused
@@ -198,22 +208,21 @@ class CheckerController(QtCore.QObject):
         base = os.path.splitext(os.path.basename(self.m3u_file))[0]
         outd = self.output_dir or os.getcwd()
         files = write_output_files(
-            self.original_lines,
-            self.entry_map,
-            self.status_map,
-            base,
-            outd,
-            split=self.split,
+            self.original_lines, self.entry_map, self.status_map,
+            base, outd, split=self.split,
             update_quality=self.update_quality,
             update_fps=self.update_fps,
             include_untested=self.include_untested
         )
-
         if files:
             for p in files:
-                # thread‐safe console and status updates
                 self.log_signal.emit("info", f"Exported M3U: {p}")
                 self.status_signal.emit(f"Exported: {p}", 3000)
         else:
             self.log_signal.emit("info", "No M3U written")
             self.status_signal.emit("No M3U written", 3000)
+
+    # Unified API for MainWindow
+    def start(self): self.start_check()
+    def pause(self): self._toggle_pause()
+    def stop(self): self.stop_check()

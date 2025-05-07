@@ -133,9 +133,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         idx = self.pages.currentIndex()
         if idx == 0:
-            self.checker_ctrl.start()
+            # IPTV page → call CheckerController.start_check()
+            self.checker_ctrl.start_check()
         else:
+            # Sorter page → call SorterController.start()
             self.sorter_ctrl.start()
+
         self.btn_start.setEnabled(False)
         self.btn_pause.setEnabled(True)
         self.btn_stop.setEnabled(True)
@@ -147,8 +150,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         idx = self.pages.currentIndex()
         if idx == 0:
-            self.checker_ctrl.pause()
+            # IPTV page → call CheckerController._toggle_pause()
+            self.checker_ctrl._toggle_pause()
         else:
+            # Sorter page → call SorterController.pause()
             self.sorter_ctrl.pause()
 
         # Toggle label
@@ -163,9 +168,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         idx = self.pages.currentIndex()
         if idx == 0:
-            self.checker_ctrl.stop()
+            # IPTV page → call CheckerController.stop_check()
+            self.checker_ctrl.stop_check()
         else:
+            # Sorter page → call SorterController.stop()
             self.sorter_ctrl.stop()
+
         self._reset_controls()
 
     def _open_options(self):
