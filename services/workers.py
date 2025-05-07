@@ -1,9 +1,10 @@
+# services/workers.py
+
 import threading
 import queue
 
 from PyQt5 import QtCore
 from checker import check_stream
-
 
 class WorkerThread(QtCore.QThread):
     """
@@ -13,7 +14,7 @@ class WorkerThread(QtCore.QThread):
     - result(entry, status, resolution, fps)
     - log(level, message)
 
-    Levels: 'working', 'info', 'error'
+    Levels: 'working', 'error'
     """
     result = QtCore.pyqtSignal(object, str, str, str)
     log = QtCore.pyqtSignal(str, str)
@@ -27,24 +28,32 @@ class WorkerThread(QtCore.QThread):
         self._stop = threading.Event()
 
     def run(self):
+        # Signal that this thread is alive
+        self.log.emit('working', '[WORKER] Thread started')
+
         # Process tasks until none remain or stopped
         while not self._stop.is_set():
             try:
-                # Each task is the full entry dict
                 entry = self.tasks.get_nowait()
-                name = entry['name']
-                url = entry['url']
             except queue.Empty:
                 break
 
-            # Pause support
+            name = entry.get('name', '<no-name>')
+            url  = entry.get('url', '')
+
+            # Honor pause
             while self._pause.is_set() and not self._stop.is_set():
                 self.msleep(100)
 
-            # Retry loop
+            # Try checking the stream up to `retries` times
             for attempt in range(1, self.retries + 1):
-                self.log.emit('info', f"Testing {name} (try {attempt})")
-                st, res, bitrate, fps = check_stream(name, url, timeout=self.timeout)
+                self.log.emit('working', f"[WORKER] Testing {name} (try {attempt})")
+                try:
+                    st, res, bitrate, fps = check_stream(name, url, timeout=self.timeout)
+                except Exception as e:
+                    self.log.emit('error', f"[WORKER] Exception testing {name}: {e}")
+                    self.result.emit(entry, 'DOWN', '–', '–')
+                    break
 
                 if st == 'UP':
                     fps_value = fps or '–'
@@ -57,7 +66,7 @@ class WorkerThread(QtCore.QThread):
                     self.result.emit(entry, st, '–', '–')
                     break
 
-                else:
+                else:  # DOWN
                     if attempt < self.retries:
                         self.log.emit('error', f"Channel: {name} is DOWN; retrying…")
                     else:

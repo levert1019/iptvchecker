@@ -151,10 +151,6 @@ class OptionsDialog(QtWidgets.QDialog):
         self.setWindowTitle("Options")
         self.resize(800, 520)
         self.selected_groups: List[str] = []
-        # placeholder for playlist sorter settings
-        self.le_tmdbApiKey: QtWidgets.QLineEdit
-        self.sp_playlist_workers: QtWidgets.QSpinBox
-        self.cb_add_year: QtWidgets.QCheckBox
         self._build_ui()
         self._load_playlist_sorter_settings()
 
@@ -199,9 +195,16 @@ class OptionsDialog(QtWidgets.QDialog):
         form2.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         form2.setHorizontalSpacing(20); form2.setVerticalSpacing(8)
 
-        self.sp_workers = QtWidgets.QSpinBox(); self.sp_workers.setRange(1, 100)
-        self.sp_retries = QtWidgets.QSpinBox(); self.sp_retries.setRange(0, 10)
-        self.sp_timeout = QtWidgets.QSpinBox(); self.sp_timeout.setRange(1, 300)
+        self.sp_workers = QtWidgets.QSpinBox()
+        self.sp_workers.setRange(1, 100)
+        self.sp_workers.setValue(5)  # default 5 workers
+        self.sp_retries = QtWidgets.QSpinBox()
+        self.sp_retries.setRange(0, 10)
+        self.sp_retries.setValue(2)  # default 2 retries
+        self.sp_timeout = QtWidgets.QSpinBox()
+        self.sp_timeout.setRange(1, 300)
+        self.sp_timeout.setValue(10)  # default 10s timeout
+
         form2.addRow("Workers:", self.sp_workers)
         form2.addRow("Retries:", self.sp_retries)
         form2.addRow("Timeout (s):", self.sp_timeout)
@@ -225,19 +228,16 @@ class OptionsDialog(QtWidgets.QDialog):
         form3.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         form3.setHorizontalSpacing(20); form3.setVerticalSpacing(8)
 
-        # TMDB API Key + Save
         self.le_tmdbApiKey = QtWidgets.QLineEdit()
         form3.addRow("TMDB API Key:", self.le_tmdbApiKey)
         self.btn_save_tmdb = QtWidgets.QPushButton("Save")
         self.btn_save_tmdb.clicked.connect(self._save_playlist_sorter_settings)
         form3.addRow(self.btn_save_tmdb)
 
-        # Number of workers for playlist sorter
         self.sp_playlist_workers = QtWidgets.QSpinBox()
         self.sp_playlist_workers.setRange(1, 64)
         form3.addRow("Amount of Workers:", self.sp_playlist_workers)
 
-        # Add Year to Name checkbox
         self.cb_add_year = QtWidgets.QCheckBox("Add Year to Name")
         form3.addRow(self.cb_add_year)
 
@@ -276,22 +276,17 @@ class OptionsDialog(QtWidgets.QDialog):
             self.selected_groups = dlg.selected_groups
 
     def _load_playlist_sorter_settings(self):
-        """
-        Load TMDB key, playlist workers, and Add Year flag from CONFIG_FILE
-        and populate the controls.
-        """
         if os.path.exists(self.CONFIG_FILE):
             with open(self.CONFIG_FILE, "r", encoding="utf-8") as f:
-                cfg = json.load(f)
+                try:
+                    cfg = json.load(f)
+                except json.JSONDecodeError:
+                    cfg = {}
             self.le_tmdbApiKey.setText(cfg.get("tmdb_api_key", ""))
             self.sp_playlist_workers.setValue(cfg.get("playlist_workers", 4))
             self.cb_add_year.setChecked(cfg.get("add_year_to_name", False))
 
     def _save_playlist_sorter_settings(self):
-        """
-        Save the playlist sorter settings to CONFIG_FILE.
-        Creates or updates the JSON file as needed.
-        """
         cfg = {}
         if os.path.exists(self.CONFIG_FILE):
             with open(self.CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -299,17 +294,14 @@ class OptionsDialog(QtWidgets.QDialog):
                     cfg = json.load(f)
                 except json.JSONDecodeError:
                     cfg = {}
-        cfg["tmdb_api_key"]      = self.le_tmdbApiKey.text().strip()
-        cfg["playlist_workers"]  = self.sp_playlist_workers.value()
-        cfg["add_year_to_name"]  = self.cb_add_year.isChecked()
+        cfg["tmdb_api_key"]     = self.le_tmdbApiKey.text().strip()
+        cfg["playlist_workers"] = self.sp_playlist_workers.value()
+        cfg["add_year_to_name"] = self.cb_add_year.isChecked()
         with open(self.CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
         QtWidgets.QMessageBox.information(self, "Saved", "Playlist Sorter settings saved.")
 
     def get_options(self) -> dict:
-        """
-        Return all options as a dict (including main, checker, and sorter settings).
-        """
         return {
             "m3u_file": self.le_m3u.text().strip(),
             "workers": self.sp_workers.value(),
