@@ -1,5 +1,20 @@
 {
+  "m3u_file": "C:/Users/lovre/Downloads/trex_raw.m3u",
+  "output_dir": "C:\\Users\\lovre\\Desktop\\projects\\iptv_checker",
+  "selected_groups": [
+    "|EN| FRENCH MOVIES / ENG SUB"
+  ],
+  "workers": 30,
+  "retries": 2,
+  "timeout": 10,
+  "split": true,
+  "update_quality": true,
+  "update_fps": true,
+  "include_untested": false,
   "tmdb_api_key": "78626a1ff6b35a1664dedb2920069f10",
-  "playlist_workers": 1,
-  "add_year_to_name": false
+  "playlist_workers": 50,
+  "add_year_to_name": true,
+  "update_banner": true,
+  "update_name": true,
+  "export_only_sorted": false
 }

@@ -1,265 +1,218 @@
-#!/usr/bin/env python3
-"""
-playlist_sorter.py
-
-Reads an M3U playlist, searches TMDB for each entry's movie/series,
-updates group-title to "PREFIX - Genre" and optionally updates the displayed
-name (localized and/or with year), then writes out a new M3U file.
-"""
+# services/playlist_sorter.py
 
 import os
 import re
-import json
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import queue
 import requests
+from typing import List, Dict, Optional, Tuple
 
-CONFIG_FILE = "config.json"
+# Regex patterns
+EXTINF_RE    = re.compile(r'#EXTINF:.*?(?P<attrs>\s.*?)\s*,(?P<name>.*)$')
+GROUP_RE     = re.compile(r'group-title="(?P<group>[^\"]*)"', re.IGNORECASE)
+CUID_RE      = re.compile(r'CUID="(?P<uid>[^\"]*)"', re.IGNORECASE)
 
-# Regex to extract the existing group-title attribute
-GROUP_TITLE_RE = re.compile(r'group-title="([^"]*)"')
-# Strip two-letter uppercase country prefixes in names
-PREFIX_NAME_RE = re.compile(r'^[A-Z]{2}\s*-\s*')
-# Capture a four-digit year in parentheses
-YEAR_RE = re.compile(r'\((\d{4})\)')
+# Cleaning regexes
+_PREFIX_RE   = re.compile(r'^[A-Z]{2,3}(?:\s*[-|]\s*|\s+)')
+_YEAR_RE     = re.compile(r'\s*(?:\(\d{4}\)|\d{4})$')
+_MULTI_RE    = re.compile(r'[\(\[]?(?:MULTI(?: SUB| AUDIO))[)\]]?', re.IGNORECASE)
+_EPISODE_RE  = re.compile(r'\s+[sS]\d{1,2}\s+[eE]\d{1,3}$')
 
 class PlaylistSorter:
+    """
+    Sorts an M3U playlist by fetching TMDB data in two phases:
+      1. Parsing & cleaning base titles
+      2. Batch TMDB lookups
+      3. Rebuilding EXTINF with proper prefixes, genres, banners, etc.
+    """
     def __init__(self):
-        # Load config.json
-        cfg = {}
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, encoding="utf-8") as f:
-                cfg = json.load(f)
-        self.api_key     = cfg.get("tmdb_api_key", "").strip()
-        self.max_workers = cfg.get("playlist_workers", 4)
-        self.add_year    = cfg.get("add_year_to_name", False)
-        self.update_name = cfg.get("update_name", False)
+        self.api_key            = ""
+        self.max_workers        = 4
+        self.add_year           = False
+        self.update_name        = False
+        self.update_banner      = False
+        self.export_only_sorted = False
 
-        # Thread control flags
-        self._stop_event  = threading.Event()
-        self._pause_event = threading.Event()
+        # Default logger (overridden by controller)
+        self.logger = lambda lvl, msg: print(f"[{lvl.upper()}] {msg}")
 
-    def start(self, m3u_path: str, output_path: str = None):
-        """
-        Begin processing. 
-        m3u_path: path to input .m3u file.
-        output_path: optional path for output; defaults to "<input>_sorted.m3u".
-        """
-        if not os.path.isfile(m3u_path):
-            print(f"[ERROR] M3U file not found: {m3u_path}")
-            return
-        if not self.api_key:
-            print("[ERROR] No TMDB API key set in config.json")
-            return
+        # Internal events & caches
+        self._stop_event   = threading.Event()
+        self._pause_event  = threading.Event()
+        self._series_cache = {}  # base_title -> (media_type, id)
+        self._name_counts  = {}  # display_name -> count
 
+    def start(self,
+              m3u_path: str,
+              output_dir: Optional[str],
+              selected_groups: Optional[List[str]] = None):
+        # Reset state
         self._stop_event.clear()
         self._pause_event.clear()
+        self._series_cache.clear()
+        self._name_counts.clear()
 
-        # Determine output filename
-        if output_path:
-            self.output_path = output_path
-        else:
-            base, ext = os.path.splitext(m3u_path)
-            self.output_path = f"{base}_sorted{ext}"
+        outd = output_dir or os.getcwd()
+        base = os.path.splitext(os.path.basename(m3u_path))[0]
+        out_file = os.path.join(outd, f"{base}_sorted.m3u")
 
-        # Read all lines
-        with open(m3u_path, "r", encoding="utf-8", errors="ignore") as f:
+        # Phase 1: parse and clean entries
+        with open(m3u_path, "r", encoding="utf-8") as f:
             lines = [line.rstrip("\n") for line in f]
 
-        # Collect indices of EXTINF + URL pairs
-        entries = []
-        for i, line in enumerate(lines):
-            if line.startswith("#EXTINF"):
-                if i + 1 < len(lines):
-                    entries.append((i, line, lines[i + 1]))
+        self.logger('info', f"Loaded {len(lines)} lines from {m3u_path}")
 
-        print(f"[INFO] {len(entries)} entries found.")
-
-        # Concurrently process entries
-        results = [None] * len(entries)
-        with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
-            future_map = {
-                pool.submit(self._process_entry, idx, extinf, url): idx
-                for idx, (_, extinf, url) in enumerate(entries)
-            }
-            for future in as_completed(future_map):
-                idx = future_map[future]
-                try:
-                    new_extinf, new_url = future.result()
-                    results[idx] = (new_extinf, new_url)
-                except Exception as e:
-                    print(f"[ERROR] Entry #{idx} failed: {e}")
-                    # Fall back to original
-                    results[idx] = (entries[idx][1], entries[idx][2])
-
-        # Reconstruct the playlist
-        out_lines = []
-        # Map original extinf/url → new
-        extinf_map = {entries[i][1]: results[i][0] for i in range(len(entries))}
-        url_map    = {entries[i][2]: results[i][1] for i in range(len(entries))}
-
-        skip_next = False
-        for line in lines:
-            if skip_next:
-                # write the URL for the last EXTINF
-                out_lines.append(url_map.get(prev_url, prev_url))
-                skip_next = False
+        entries = []  # list of dicts for each EXTINF entry
+        for idx, line in enumerate(lines):
+            if not line.startswith("#EXTINF"):
                 continue
-            if line.startswith("#EXTINF"):
-                new_ext = extinf_map.get(line, line)
-                out_lines.append(new_ext)
-                prev_url = lines[lines.index(line) + 1]
-                skip_next = True
-            else:
-                # preserve comments or other metadata lines
-                out_lines.append(line)
+            url = lines[idx+1] if idx+1 < len(lines) else ""
+            m = EXTINF_RE.match(line)
+            if not m:
+                continue
+            attrs_str = m.group("attrs")
+            name = m.group("name")
+            attrs = dict(re.findall(r'([\w-]+)="([^" ]*)"', attrs_str))
+            group = attrs.get("group-title", "")
 
-        # Write out the new file
-        with open(self.output_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(out_lines) + "\n")
+            # Extract season/episode suffix
+            ep_match = _EPISODE_RE.search(name)
+            ep_suffix = ep_match.group(0) if ep_match else ""
 
-        print(f"[INFO] Sorted playlist written to {self.output_path}")
+            # Strip cleaning tokens for base title
+            clean = name
+            clean = _PREFIX_RE.sub("", clean)
+            clean = _YEAR_RE.sub("", clean)
+            clean = _MULTI_RE.sub("", clean)
+            clean = clean.strip()
+            # Remove episode suffix
+            clean = _EPISODE_RE.sub("", clean).strip()
 
-    def pause(self):
-        """
-        Toggle pause/resume.
-        """
-        if self._pause_event.is_set():
-            print("[INFO] Resuming")
-            self._pause_event.clear()
-        else:
-            print("[INFO] Pausing")
-            self._pause_event.set()
+            entries.append({
+                "idx": idx,
+                "raw_extinf": line,
+                "url": url,
+                "attrs": attrs,
+                "group": group,
+                "prefix": group[:group.find(clean)] if clean in group else "",
+                "base_title": clean,
+                "ep_suffix": ep_suffix
+            })
 
-    def stop(self):
-        """
-        Signal all threads to stop ASAP.
-        """
-        print("[INFO] Stopping")
-        self._stop_event.set()
+        # Filter and unique titles
+        filtered = [e for e in entries if not selected_groups or e["group"] in selected_groups]
+        unique_titles = {e["base_title"] for e in filtered}
+        self.logger('info', f"TMDB lookup for {len(unique_titles)} unique titles")
 
-    def _process_entry(self, idx, extinf, url):
-        """
-        Internal: process a single entry.
-        Returns (new_extinf_line, url).
-        """
-        # allow stop
-        if self._stop_event.is_set():
-            raise InterruptedError("Stopped by user")
+        # Phase 2: batch TMDB lookup
+        for title in unique_titles:
+            if self._stop_event.is_set():
+                break
+            while self._pause_event.is_set():
+                time.sleep(0.1)
+            tmdb = self._search_tmdb(title)
+            if tmdb:
+                self._series_cache[title] = tmdb
 
-        # handle pause
-        while self._pause_event.is_set():
-            time.sleep(0.1)
+        # Phase 3: rebuild EXTINF lines
+        out_lines = ["#EXTM3U"]
+        for e in entries:
+            if self._stop_event.is_set():
+                break
+            while self._pause_event.is_set():
+                time.sleep(0.1)
 
-        # split EXTINF into attributes + displayed name
-        parts = extinf.split(",", 1)
-        attrs     = parts[0]
-        orig_name = parts[1] if len(parts) > 1 else ""
+            if selected_groups and e["group"] not in selected_groups:
+                if not self.export_only_sorted:
+                    out_lines.append(e["raw_extinf"])
+                    out_lines.append(e["url"])
+                continue
 
-        # extract original group-title
-        m = GROUP_TITLE_RE.search(attrs)
-        orig_group = m.group(1) if m else ""
-        # get prefix (e.g. "EN" from "EN - Something")
-        prefix = orig_group.split(" - ")[0].strip() if " - " in orig_group else ""
+            tmdb = self._series_cache.get(e["base_title"])
+            if not tmdb:
+                self.logger('error', f"No TMDB result for '{e['base_title']}'")
+                if not self.export_only_sorted:
+                    out_lines.append(e["raw_extinf"])
+                    out_lines.append(e["url"])
+                continue
 
-        # clean the displayed name for TMDB search
-        search_name = orig_name
-        # strip country-code prefix in name itself
-        if prefix and search_name.upper().startswith(prefix.upper()):
-            search_name = re.sub(rf'^{re.escape(prefix)}\s*-\s*', "", search_name)
-        # strip any two-letter uppercase prefix
-        search_name = PREFIX_NAME_RE.sub("", search_name)
-        # extract year if present
-        ymatch = YEAR_RE.search(search_name)
-        year   = ymatch.group(1) if ymatch else ""
-        search_name = YEAR_RE.sub("", search_name).strip()
+            media_type, tmdb_id = tmdb
+            detail = self._get_tmdb_details(media_type, tmdb_id)
+            if not detail:
+                self.logger('error', f"Failed TMDB details for '{e['base_title']}'")
+                if not self.export_only_sorted:
+                    out_lines.append(e["raw_extinf"])
+                    out_lines.append(e["url"])
+                continue
 
-        print(f"[WORKING] #{idx} searching TMDB for \"{search_name}\"")
-        res = self._search_tmdb(search_name)
-        if not res:
-            print(f"[ERROR] No TMDB match for \"{search_name}\"")
-            return extinf, url
+            # Build new attributes
+            genres = detail.get("genres", [])
+            genre = genres[0]["name"] if genres else "Uncategorized"
+            grp = f"{e['prefix']}{genre}"
+            attrs = e["attrs"].copy()
+            attrs["group-title"] = grp
 
-        mtype  = res.get("media_type") or ("movie" if "title" in res else "tv")
-        tmdb_id = res["id"]
-        detail = self._get_tmdb_details(mtype, tmdb_id)
-        if not detail:
-            print(f"[ERROR] Failed to fetch details for ID {tmdb_id}")
-            return extinf, url
+            if self.update_banner and detail.get("poster_path"):
+                attrs["tvg-logo"] = f"https://image.tmdb.org/t/p/w500{detail['poster_path']}"
 
-        # pick the first genre
-        genres = [g["name"] for g in detail.get("genres", [])]
-        genre  = genres[0] if genres else "Unknown"
-        new_group = f"{prefix} - {genre}" if prefix else genre
+            # Display name
+            new_name = detail.get("title") or detail.get("name") or e["base_title"]
+            if self.add_year:
+                y = (detail.get("release_date") or detail.get("first_air_date") or "")[:4]
+                if y:
+                    new_name += f" ({y})"
 
-        # build the new displayed name
-        if self.update_name:
-            localized = self._get_localized_name(mtype, tmdb_id, prefix)
-            base_name = localized or detail.get("title" if mtype=="movie" else "name", orig_name)
-        else:
-            base_name = orig_name
+            # Handle duplicates
+            count = self._name_counts.get(new_name, 0) + 1
+            self._name_counts[new_name] = count
+            suffix = f" #{count}" if count > 1 else ""
+            disp_name = new_name + suffix + e["ep_suffix"]
 
-        if self.add_year and year:
-            new_name = f"{base_name.strip()} ({year})"
-        else:
-            new_name = base_name
+            if self.update_name:
+                attrs["tvg-name"] = disp_name
 
-        # replace or inject group-title in attrs
-        if GROUP_TITLE_RE.search(attrs):
-            new_attrs = GROUP_TITLE_RE.sub(f'group-title="{new_group}"', attrs)
-        else:
-            new_attrs = attrs + f' group-title="{new_group}"'
+            # Serialize EXTINF
+            attr_str = " ".join(f'{k}="{v}"' for k, v in attrs.items())
+            new_ext = f"#EXTINF:0 {attr_str},{disp_name}"
+            out_lines.append(new_ext)
+            out_lines.append(e["url"])
 
-        new_extinf = f"{new_attrs},{new_name}"
-        print(f"[INFO] #{idx} → group: \"{new_group}\", name: \"{new_name}\"")
-        return new_extinf, url
+            self.logger('working', f"{disp_name} → {grp}")
 
-    def _search_tmdb(self, query: str):
-        """
-        Use TMDB's multi-search endpoint.
-        """
+        # Write out file
+        with open(out_file, "w", encoding="utf-8") as f:
+            for line in out_lines:
+                f.write(line + "\n")
+
+        self.logger('info', f"Written sorted playlist to {out_file}")
+
+    def _search_tmdb(self, query: str) -> Optional[Tuple[str,int]]:
         url = "https://api.themoviedb.org/3/search/multi"
-        params = {"api_key": self.api_key, "query": query, "include_adult": False}
-        r = requests.get(url, params=params)
-        if r.status_code != 200:
+        params = {"api_key": self.api_key, "query": query}
+        try:
+            r = requests.get(url, params=params, timeout=10)
+            r.raise_for_status()
+            results = r.json().get("results", [])
+            if not results:
+                return None
+            first = results[0]
+            return first.get("media_type"), first.get("id")
+        except Exception as e:
+            self.logger('error', f"TMDB search error '{query}': {e}")
             return None
-        data = r.json().get("results", [])
-        return data[0] if data else None
 
-    def _get_tmdb_details(self, media_type: str, tmdb_id: int):
-        """
-        Fetch the full details endpoint to retrieve genres & dates.
-        """
-        url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}"
-        r = requests.get(url, params={"api_key": self.api_key})
-        if r.status_code != 200:
-            return None
-        return r.json()
-
-    def _get_localized_name(self, media_type: str, tmdb_id: int, prefix: str):
-        """
-        Fetch translations and pick the title/name matching the two-letter prefix
-        (ISO 639-1 code).
-        """
-        iso = prefix.lower()
-        url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/translations"
-        r = requests.get(url, params={"api_key": self.api_key})
-        if r.status_code != 200:
-            return None
-        for t in r.json().get("translations", []):
-            if t.get("iso_639_1") == iso:
-                d = t.get("data", {})
-                return d.get("title") or d.get("name")
-        return None
-
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 2:
-        print("Usage: python playlist_sorter.py <input.m3u> [output.m3u]")
-        sys.exit(1)
-    sorter = PlaylistSorter()
-    in_file  = sys.argv[1]
-    out_file = sys.argv[2] if len(sys.argv) > 2 else None
-    sorter.start(in_file, out_file)
+    def _get_tmdb_details(self, media_type: str, tmdb_id: int) -> Optional[dict]:
+        if media_type == "movie":
+            path = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
+        elif media_type == "tv":
+            path = f"https://api.themoviedb.org/3/tv/{tmdb_id}"
+        else:
+            return {}
+        try:
+            r = requests.get(path, params={"api_key": self.api_key}, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            self.logger('error', f"TMDB details error for '{query}': {e}")
+            return {}

@@ -11,13 +11,8 @@ _GROUP_RE = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
 
 def _parse_categories(m3u_path: str) -> Dict[str, Dict[str, int]]:
     """
-    Read the M3U and bucket each entry into exactly one of:
-      • "Live Channels" if neither 'movie' nor 'series' appears in the URL
-      • "Movies" if 'movie' appears in the URL
-      • "Series" if 'series' appears in the URL
-
-    Returns a dict mapping category → { group_title: count, … }
-    in the order groups first appear in the file.
+    Read the M3U and bucket each entry into Live Channels, Movies, or Series.
+    Returns a dict mapping category → { group_title: count, … }.
     """
     cats = {
         "Live Channels": {},
@@ -39,16 +34,14 @@ def _parse_categories(m3u_path: str) -> Dict[str, Dict[str, int]]:
             bucket = cats["Movies"]
         else:
             bucket = cats["Live Channels"]
-        if group not in bucket:
-            bucket[group] = 0
+        bucket.setdefault(group, 0)
         bucket[group] += 1
     return cats
 
 
 class GroupSelectionDialog(QtWidgets.QDialog):
     """
-    Dialog for selecting which groups to include, categorized into
-    Live Channels | Movies | Series.
+    Dialog to select which groups to include from the M3U.
     """
     def __init__(self, m3u_file: str, parent=None):
         super().__init__(parent)
@@ -137,12 +130,7 @@ class GroupSelectionDialog(QtWidgets.QDialog):
 
 class OptionsDialog(QtWidgets.QDialog):
     """
-    Main Options dialog:
-      - choose M3U file
-      - launch GroupSelectionDialog
-      - choose output folder
-      - set IPTV Checker settings
-      - set Playlist Sorter settings (TMDB API Key, workers, add year)
+    Main Options dialog, covering checker and sorter settings, with persistent Save All.
     """
     CONFIG_FILE = "config.json"
 
@@ -152,14 +140,14 @@ class OptionsDialog(QtWidgets.QDialog):
         self.resize(800, 520)
         self.selected_groups: List[str] = []
         self._build_ui()
-        self._load_playlist_sorter_settings()
+        self._load_all_settings()
 
     def _build_ui(self):
         main_v = QtWidgets.QVBoxLayout(self)
         main_v.setContentsMargins(10, 10, 10, 10)
         main_v.setSpacing(15)
 
-        # ── Main Options ─────────────────────────────────────────
+        # Main Options
         gb1 = QtWidgets.QGroupBox("Main Options")
         gb1.setStyleSheet("""
             QGroupBox { border:2px solid #5b2fc9; border-radius:5px; margin-top:6px; }
@@ -170,7 +158,8 @@ class OptionsDialog(QtWidgets.QDialog):
 
         grid.addWidget(QtWidgets.QLabel("M3U File:"), 0, 0)
         self.le_m3u = QtWidgets.QLineEdit()
-        b1 = QtWidgets.QPushButton("Browse…"); b1.clicked.connect(self._browse_m3u)
+        b1 = QtWidgets.QPushButton("Browse…")
+        b1.clicked.connect(self._browse_m3u)
         h1 = QtWidgets.QHBoxLayout(); h1.addWidget(self.le_m3u); h1.addWidget(b1)
         grid.addLayout(h1, 0, 1)
 
@@ -181,13 +170,14 @@ class OptionsDialog(QtWidgets.QDialog):
 
         grid.addWidget(QtWidgets.QLabel("Output Directory:"), 2, 0)
         self.le_out = QtWidgets.QLineEdit(os.getcwd())
-        b2 = QtWidgets.QPushButton("Browse…"); b2.clicked.connect(self._browse_out)
+        b2 = QtWidgets.QPushButton("Browse…")
+        b2.clicked.connect(self._browse_out)
         h2 = QtWidgets.QHBoxLayout(); h2.addWidget(self.le_out); h2.addWidget(b2)
         grid.addLayout(h2, 2, 1)
 
-        main_v.addWidget(gb1, 0)
+        main_v.addWidget(gb1)
 
-        # ── IPTV Checker Settings ───────────────────────────────
+        # IPTV Checker Settings
         gb2 = QtWidgets.QGroupBox("IPTV Checker Settings")
         gb2.setStyleSheet(gb1.styleSheet())
         form2 = QtWidgets.QFormLayout(gb2)
@@ -195,16 +185,9 @@ class OptionsDialog(QtWidgets.QDialog):
         form2.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         form2.setHorizontalSpacing(20); form2.setVerticalSpacing(8)
 
-        self.sp_workers = QtWidgets.QSpinBox()
-        self.sp_workers.setRange(1, 100)
-        self.sp_workers.setValue(5)  # default 5 workers
-        self.sp_retries = QtWidgets.QSpinBox()
-        self.sp_retries.setRange(0, 10)
-        self.sp_retries.setValue(2)  # default 2 retries
-        self.sp_timeout = QtWidgets.QSpinBox()
-        self.sp_timeout.setRange(1, 300)
-        self.sp_timeout.setValue(10)  # default 10s timeout
-
+        self.sp_workers = QtWidgets.QSpinBox(); self.sp_workers.setRange(1, 100)
+        self.sp_retries = QtWidgets.QSpinBox(); self.sp_retries.setRange(0, 10)
+        self.sp_timeout = QtWidgets.QSpinBox(); self.sp_timeout.setRange(1, 300)
         form2.addRow("Workers:", self.sp_workers)
         form2.addRow("Retries:", self.sp_retries)
         form2.addRow("Timeout (s):", self.sp_timeout)
@@ -218,9 +201,9 @@ class OptionsDialog(QtWidgets.QDialog):
         form2.addRow(self.cb_update_fps)
         form2.addRow(self.cb_include_untested)
 
-        main_v.addWidget(gb2, 1)
+        main_v.addWidget(gb2)
 
-        # ── Playlist Sorter Settings ────────────────────────────
+        # Playlist Sorter Settings
         gb3 = QtWidgets.QGroupBox("Playlist Sorter Settings")
         gb3.setStyleSheet(gb1.styleSheet())
         form3 = QtWidgets.QFormLayout(gb3)
@@ -230,9 +213,6 @@ class OptionsDialog(QtWidgets.QDialog):
 
         self.le_tmdbApiKey = QtWidgets.QLineEdit()
         form3.addRow("TMDB API Key:", self.le_tmdbApiKey)
-        self.btn_save_tmdb = QtWidgets.QPushButton("Save")
-        self.btn_save_tmdb.clicked.connect(self._save_playlist_sorter_settings)
-        form3.addRow(self.btn_save_tmdb)
 
         self.sp_playlist_workers = QtWidgets.QSpinBox()
         self.sp_playlist_workers.setRange(1, 64)
@@ -241,13 +221,26 @@ class OptionsDialog(QtWidgets.QDialog):
         self.cb_add_year = QtWidgets.QCheckBox("Add Year to Name")
         form3.addRow(self.cb_add_year)
 
-        main_v.addWidget(gb3, 2)
+        self.cb_update_banner = QtWidgets.QCheckBox("Update Banner (tvg-logo)")
+        form3.addRow(self.cb_update_banner)
 
-        # ── OK / Cancel ──────────────────────────────────────────
+        self.cb_update_name = QtWidgets.QCheckBox("Update Name from TMDB")
+        form3.addRow(self.cb_update_name)
+
+        self.cb_export_only_sorted = QtWidgets.QCheckBox("Export Just Sorted Channels")
+        form3.addRow(self.cb_export_only_sorted)
+
+        main_v.addWidget(gb3)
+
+        # OK / Save All / Cancel
         bb = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+            QtWidgets.QDialogButtonBox.Ok |
+            QtWidgets.QDialogButtonBox.Save |
+            QtWidgets.QDialogButtonBox.Cancel
         )
+        bb.button(QtWidgets.QDialogButtonBox.Save).setText("Save All")
         bb.accepted.connect(self.accept)
+        bb.button(QtWidgets.QDialogButtonBox.Save).clicked.connect(self._save_all_settings)
         bb.rejected.connect(self.reject)
         main_v.addWidget(bb)
 
@@ -271,22 +264,14 @@ class OptionsDialog(QtWidgets.QDialog):
             QtWidgets.QMessageBox.warning(self, "No M3U", "Please select an M3U file first.")
             return
         dlg = GroupSelectionDialog(m3u, parent=self)
-        dlg.selected_groups = list(self.selected_groups)
+        # Preload previous selections
+        for key, cb in dlg._checkboxes.items():
+            _, grp = key.split("|", 1)
+            cb.setChecked(grp in self.selected_groups)
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
             self.selected_groups = dlg.selected_groups
 
-    def _load_playlist_sorter_settings(self):
-        if os.path.exists(self.CONFIG_FILE):
-            with open(self.CONFIG_FILE, "r", encoding="utf-8") as f:
-                try:
-                    cfg = json.load(f)
-                except json.JSONDecodeError:
-                    cfg = {}
-            self.le_tmdbApiKey.setText(cfg.get("tmdb_api_key", ""))
-            self.sp_playlist_workers.setValue(cfg.get("playlist_workers", 4))
-            self.cb_add_year.setChecked(cfg.get("add_year_to_name", False))
-
-    def _save_playlist_sorter_settings(self):
+    def _load_all_settings(self):
         cfg = {}
         if os.path.exists(self.CONFIG_FILE):
             with open(self.CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -294,26 +279,69 @@ class OptionsDialog(QtWidgets.QDialog):
                     cfg = json.load(f)
                 except json.JSONDecodeError:
                     cfg = {}
-        cfg["tmdb_api_key"]     = self.le_tmdbApiKey.text().strip()
-        cfg["playlist_workers"] = self.sp_playlist_workers.value()
-        cfg["add_year_to_name"] = self.cb_add_year.isChecked()
+
+        # Main
+        self.le_m3u.setText(cfg.get("m3u_file", ""))
+        self.le_out.setText(cfg.get("output_dir", os.getcwd()))
+        self.selected_groups = cfg.get("selected_groups", [])
+
+        # Checker
+        self.sp_workers.setValue(cfg.get("workers", 5))
+        self.sp_retries.setValue(cfg.get("retries", 2))
+        self.sp_timeout.setValue(cfg.get("timeout", 10))
+        self.cb_split.setChecked(cfg.get("split", False))
+        self.cb_update_quality.setChecked(cfg.get("update_quality", False))
+        self.cb_update_fps.setChecked(cfg.get("update_fps", False))
+        self.cb_include_untested.setChecked(cfg.get("include_untested", False))
+
+        # Sorter
+        self.le_tmdbApiKey.setText(cfg.get("tmdb_api_key", ""))
+        self.sp_playlist_workers.setValue(cfg.get("playlist_workers", 4))
+        self.cb_add_year.setChecked(cfg.get("add_year_to_name", False))
+        self.cb_update_banner.setChecked(cfg.get("update_banner", False))
+        self.cb_update_name.setChecked(cfg.get("update_name", False))
+        self.cb_export_only_sorted.setChecked(cfg.get("export_just_sorted", False))
+
+    def _save_all_settings(self):
+        cfg = {
+            "m3u_file":           self.le_m3u.text().strip(),
+            "output_dir":         self.le_out.text().strip(),
+            "selected_groups":    self.selected_groups,
+            "workers":            self.sp_workers.value(),
+            "retries":            self.sp_retries.value(),
+            "timeout":            self.sp_timeout.value(),
+            "split":              self.cb_split.isChecked(),
+            "update_quality":     self.cb_update_quality.isChecked(),
+            "update_fps":         self.cb_update_fps.isChecked(),
+            "include_untested":   self.cb_include_untested.isChecked(),
+            "tmdb_api_key":       self.le_tmdbApiKey.text().strip(),
+            "playlist_workers":   self.sp_playlist_workers.value(),
+            "add_year_to_name":   self.cb_add_year.isChecked(),
+            "update_banner":      self.cb_update_banner.isChecked(),
+            "update_name":        self.cb_update_name.isChecked(),
+            "export_just_sorted": self.cb_export_only_sorted.isChecked(),
+        }
         with open(self.CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
-        QtWidgets.QMessageBox.information(self, "Saved", "Playlist Sorter settings saved.")
+        QtWidgets.QMessageBox.information(self, "Saved", "All settings saved.")
+        self.accept()
 
     def get_options(self) -> dict:
         return {
-            "m3u_file": self.le_m3u.text().strip(),
-            "workers": self.sp_workers.value(),
-            "retries": self.sp_retries.value(),
-            "timeout": self.sp_timeout.value(),
-            "split": self.cb_split.isChecked(),
-            "update_quality": self.cb_update_quality.isChecked(),
-            "update_fps": self.cb_update_fps.isChecked(),
-            "include_untested": self.cb_include_untested.isChecked(),
-            "output_dir": self.le_out.text().strip(),
-            "selected_groups": self.selected_groups,
-            "tmdb_api_key": self.le_tmdbApiKey.text().strip(),
-            "playlist_workers": self.sp_playlist_workers.value(),
-            "add_year_to_name": self.cb_add_year.isChecked(),
+            "m3u_file":           self.le_m3u.text().strip(),
+            "workers":            self.sp_workers.value(),
+            "retries":            self.sp_retries.value(),
+            "timeout":            self.sp_timeout.value(),
+            "split":              self.cb_split.isChecked(),
+            "update_quality":     self.cb_update_quality.isChecked(),
+            "update_fps":         self.cb_update_fps.isChecked(),
+            "include_untested":   self.cb_include_untested.isChecked(),
+            "output_dir":         self.le_out.text().strip(),
+            "selected_groups":    self.selected_groups,
+            "tmdb_api_key":       self.le_tmdbApiKey.text().strip(),
+            "playlist_workers":   self.sp_playlist_workers.value(),
+            "add_year_to_name":   self.cb_add_year.isChecked(),
+            "update_banner":      self.cb_update_banner.isChecked(),
+            "update_name":        self.cb_update_name.isChecked(),
+            "export_just_sorted": self.cb_export_only_sorted.isChecked(),
         }
