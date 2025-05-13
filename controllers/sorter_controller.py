@@ -3,13 +3,15 @@
 import os
 import threading
 from PyQt5 import QtWidgets, QtCore
+from services.parser import parse_groups
 from services.playlist_sorter import PlaylistSorter
 
 class SorterController(QtCore.QObject):
     """
     Controller for the Playlist Sorter tab.
-    Manages start, pause, resume, and stop actions, and routes log messages into the GUI console.
-    Optimized to append new logs incrementally to avoid UI lag.
+    Manages start, pause, resume, and stop actions,
+    routes log messages into the GUI console, and
+    applies a 'all-groups' fallback if you haven't picked any.
     """
     log_signal = QtCore.pyqtSignal(str, str)  # (level, message)
 
@@ -23,13 +25,10 @@ class SorterController(QtCore.QObject):
         self.output_dir = os.getcwd()
         self._logbuf = []
 
-        # Connect sorter logs to handler
+        # Wire GUI console
         self.log_signal.connect(self._on_log)
-        # Filters trigger full refresh only when toggled
         for cb in (self.ui.cb_show_working, self.ui.cb_show_info, self.ui.cb_show_error):
             cb.stateChanged.connect(self._refresh_console)
-
-        # Clear console initially
         self.ui.te_console.clear()
 
     def start(self):
@@ -43,11 +42,24 @@ class SorterController(QtCore.QObject):
             )
             return
 
-        # Persist paths
+        # Persist for Options reload
         self.m3u_file = m3u
         self.output_dir = opts["output_dir"] or os.getcwd()
 
-        # Apply sorter-specific options
+        # Determine which groups to process; fallback to all if none picked
+        selected = opts["selected_groups"]
+        if not selected:
+            all_groups, _ = parse_groups(m3u)
+            selected = list(all_groups.keys())
+            self.main_window.statusBar().showMessage(
+                f"No groups selected—falling back to all {len(selected)} groups", 3000
+            )
+        else:
+            self.main_window.statusBar().showMessage(
+                f"Sorting {len(selected)} selected group(s)", 3000
+            )
+
+        # Apply sorter settings
         self.sorter.api_key             = opts["tmdb_api_key"]
         self.sorter.max_workers         = opts["playlist_workers"]
         self.sorter.add_year            = opts["add_year_to_name"]
@@ -61,17 +73,17 @@ class SorterController(QtCore.QObject):
         if hasattr(self.sorter, "_pause_event"):
             self.sorter._pause_event.clear()
 
-        # Redirect logs to GUI
+        # Redirect logs to the GUI
         self.sorter.logger = lambda lvl, msg: self.log_signal.emit(lvl, msg)
 
-        # Clear console history
+        # Clear the console buffer and view
         self._logbuf.clear()
         self.ui.te_console.clear()
 
-        # Launch sorter in background
+        # Launch in background so the UI stays responsive
         thread = threading.Thread(
             target=self.sorter.start,
-            args=(m3u, self.output_dir, opts["selected_groups"]),
+            args=(m3u, self.output_dir, selected),
             daemon=True
         )
         thread.start()
@@ -92,21 +104,19 @@ class SorterController(QtCore.QObject):
             self.sorter.stop()
 
     def _on_log(self, level, msg):
-        """Handle a new log message: buffer it and append incrementally."""
-        # Store in buffer for future filter-refresh
+        """Append a new log message to the buffer and the console."""
         self._logbuf.append((level, msg))
-
-        # Only append the new message to the console (no full clear)
+        # Append only the newest line to avoid redrawing everything
         colors = {"working": "green", "info": "orange", "error": "red"}
         cb = getattr(self.ui, f"cb_show_{level}", None)
         if cb and cb.isChecked():
             self.ui.te_console.append(f'<span style="color:{colors[level]}">{msg}</span>')
 
     def _refresh_console(self):
-        """Re-render full console based on current filter states (on toggle)."""
+        """Re-render the entire console on filter toggles."""
         self.ui.te_console.clear()
         colors = {"working": "green", "info": "orange", "error": "red"}
-        for lvl, msg in self._logbuf:
+        for lvl, m in self._logbuf:
             cb = getattr(self.ui, f"cb_show_{lvl}", None)
             if cb and cb.isChecked():
-                self.ui.te_console.append(f'<span style="color:{colors[lvl]}">{msg}</span>')
+                self.ui.te_console.append(f'<span style="color:{colors[lvl]}">{m}</span>')
