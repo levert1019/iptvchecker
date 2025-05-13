@@ -1,69 +1,48 @@
 # services/parser.py
-
 import re
-from typing import Dict, List, Tuple
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Tuple
 
-# Match key="value" pairs, including hyphens in the key
-ATTR_RE   = re.compile(r'([\w-]+)="([^"]*)"')
-GROUP_RE  = re.compile(r'group-title="([^"]*)"', re.IGNORECASE)
+from services.utils import RegexRules
 
-def parse_groups(m3u_path: str) -> Tuple[Dict[str, List[dict]], Dict[str, List[str]]]:
-    """
-    Parse an M3U file into:
-      - group_entries: { group_title: [entry_dict, ...], ... }
-      - categories:    { category_name: [group_title, ...], ... }
+@dataclass
+class Entry:
+    raw_inf: str
+    url: str
+    group: str
+    original_name: str
+    processed: bool = False
+    base: str = ""
+    ep_suffix: str = ""
+    prefix: str = ""
 
-    Each entry_dict has:
-      {
-        "uid":        str,  # from CUID=""
-        "name":       str,  # the display name after the comma
-        "raw_extinf": str,  # full #EXTINF line
-        "url":        str   # the following URL
-      }
-    """
-    group_entries: Dict[str, List[dict]] = {}
-    categories:    Dict[str, List[str]] = {}
+def parse_groups(m3u_path: str) -> Tuple[dict, List[str]]:
+    rules = RegexRules()
+    lines = Path(m3u_path).read_text(encoding='utf-8').splitlines()
+    groups = {}
+    for i, line in enumerate(lines):
+        if line.startswith("#EXTINF"):
+            m = rules.GROUP_RE.search(line)
+            grp_name = m.group(1) if m else ""
+            url = lines[i+1].strip() if i+1 < len(lines) else ""
+            name = line.split(",", 1)[1].strip() if "," in line else ""
+            e = Entry(raw_inf=line, url=url, group=grp_name, original_name=name)
+            groups.setdefault(grp_name, []).append(e)
+    return groups, lines
 
-    # Read all lines
-    with open(m3u_path, "r", encoding="utf-8") as f:
-        lines = [line.rstrip("\n") for line in f]
-
-    for idx, line in enumerate(lines):
-        if not line.startswith("#EXTINF"):
-            continue
-
-        extinf = line
-        url    = lines[idx + 1] if idx + 1 < len(lines) else ""
-
-        # Extract attributes
-        attrs = dict(ATTR_RE.findall(extinf))
-        uid   = attrs.get("CUID")
-
-        # Extract the display name (text after the first comma)
-        if "," in extinf:
-            name = extinf.split(",", 1)[1]
-        else:
-            name = ""
-
-        # Extract group-title
-        m = GROUP_RE.search(extinf)
-        group = m.group(1) if m else "Ungrouped"
-
-        entry = {
-            "uid":        uid,
-            "name":       name,
-            "raw_extinf": extinf,
-            "url":        url
-        }
-
-        # Append to group_entries
-        group_entries.setdefault(group, []).append(entry)
-
-        # Derive category (prefix before " - ")
-        if " - " in group:
-            cat = group.split(" - ", 1)[0].strip()
-        else:
-            cat = group
-        categories.setdefault(cat, []).append(group)
-
-    return group_entries, categories
+def clean_entries(entries: List[Entry]) -> None:
+    rules = RegexRules()
+    for e in entries:
+        # prefix
+        parts = re.split(r" – |\|", e.group, 1)
+        e.prefix = parts[0] + " – " if len(parts) > 1 else ""
+        # episode suffix
+        m = rules.EPISODE_RE.search(e.original_name)
+        e.ep_suffix = m.group(0) if m else ""
+        # strip codes, years, multi, episode
+        name = rules.PREFIX_RE.sub("", e.original_name)
+        name = rules.YEAR_RE.sub("", name)
+        name = rules.MULTI_RE.sub("", name)
+        name = rules.EPISODE_RE.sub("", name)
+        e.base = name.strip()

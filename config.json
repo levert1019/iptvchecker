@@ -1,8 +1,8 @@
 {
-  "m3u_file": "C:/Users/lovre/Downloads/trex_raw.m3u",
+  "m3u_file": "C:/Users/lovre/Downloads/Playlist__5 (8).m3u",
   "output_dir": "C:\\Users\\lovre\\Desktop\\projects\\iptv_checker",
   "selected_groups": [
-    "EN - Uncategorized"
+    "NETFLIX MOVIES"
   ],
   "workers": 30,
   "retries": 2,
@@ -13,7 +13,7 @@
   "include_untested": false,
   "tmdb_api_key": "78626a1ff6b35a1664dedb2920069f10",
   "playlist_workers": 50,
-  "add_year_to_name": true,
+  "add_year_to_name": false,
   "update_banner": true,
   "update_name": true,
   "export_just_sorted": true

@@ -8,13 +8,21 @@ QUALITY_LABELS = {
     'uhd': 'ᵁᴴᴰ'
 }
 
+# Table for superscript digits
+_SUP_DIGITS = str.maketrans({
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+})
+
+# Characters used in superscript annotations
+_SUP_CHARS = set(''.join(QUALITY_LABELS.values()) + 'ᶠᵖˢ' + ''.join('⁰¹²³⁴⁵⁶⁷⁸⁹×'))
+_SUP_PATTERN = re.compile(f"[{''.join(_SUP_CHARS)}]")
+
+
 def sup_digits(text: str) -> str:
-    """Convert digits to superscript."""
-    tbl = str.maketrans({
-        '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-        '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
-    })
-    return text.translate(tbl)
+    """Convert ASCII digits in text to their superscript equivalents."""
+    return text.translate(_SUP_DIGITS)
+
 
 def format_fps(text: str) -> str:
     """
@@ -24,17 +32,16 @@ def format_fps(text: str) -> str:
     m = re.search(r"(\d+(?:\.\d+)?)", text or "")
     if not m:
         return ''
-    num = m.group(1)
+    num_str = m.group(1)
     try:
-        rounded = int(round(float(num)))
-        num = str(rounded)
-    except Exception:
-        # fallback: drop any decimal part
-        num = num.split('.')[0]
-    return f"{sup_digits(num)}ᶠᵖˢ"
+        num = round(float(num_str))
+    except ValueError:
+        return ''
+    return sup_digits(str(num)) + 'ᶠᵖˢ'
+
 
 def resolution_to_label(res: str) -> str:
-    """Map a resolution string 'WIDTH×HEIGHT' to a quality label."""
+    """Map a resolution string 'WIDTH×HEIGHT' to a quality superscript label."""
     parts = res.split('×')
     if len(parts) != 2:
         return ''
@@ -52,16 +59,19 @@ def resolution_to_label(res: str) -> str:
         key = 'sd'
     return QUALITY_LABELS[key]
 
-_SUP_CHARS = set(''.join(QUALITY_LABELS.values()) + 'ᶠᵖˢ' + ''.join('⁰¹²³⁴⁵⁶⁷⁸⁹×'))
-_SUP_PATTERN = re.compile(f"[{''.join(_SUP_CHARS)}]")
 
 def clean_name(name: str) -> str:
     """Strip all superscript quality/fps/resolution characters and collapse whitespace."""
-    # 1) remove entire multi-char quality labels (just in case)
     for label in QUALITY_LABELS.values():
         name = name.replace(label, '')
-    # 2) strip any remaining superscript chars (digits, x, letters, fps marker)
     name = _SUP_PATTERN.sub('', name)
-    # 3) collapse multiple spaces
-    name = re.sub(r'\s+', ' ', name)
-    return name.strip()
+    return re.sub(r'\s+', ' ', name).strip()
+
+
+class RegexRules:
+    """Central regex patterns for parsing M3U entries."""
+    GROUP_RE   = re.compile(r'group-title="([^"]+)"')
+    PREFIX_RE  = re.compile(r'^[A-Z0-9]{2,4}\s*')
+    YEAR_RE    = re.compile(r'\b(19|20)\d{2}\b')
+    MULTI_RE   = re.compile(r'\(MULTI\)', re.IGNORECASE)
+    EPISODE_RE = re.compile(r'\bS\d{2}E\d{2}\b')
